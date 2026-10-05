@@ -9,7 +9,7 @@ function midRange(s) {
 
 export const meta = {
   name: 'Александр',
-  updated: '04.10.2026',
+  updated: '05.10.2026',
   height: 180,
   startKg: 101.5,
   targetProtein: [160, 180],
@@ -17,6 +17,115 @@ export const meta = {
   pullGoal: 25,
   pullGoalNote: '25 чистых в одном подходе',
 }
+
+/**
+ * Рацион по дням — как у детей в power_note:
+ * menu[] (текст приёмов) + items[] (id продукта, граммы/шт, приём).
+ */
+export const foodDays = [
+  {
+    date: '2026-10-01',
+    menu: [
+      { meal: 'Завтрак', dishes: 'Творог 5% 350 г, Агуша 140 г, хлеб зерновой 100 г' },
+      { meal: 'Перекус', dishes: 'Блины 2 шт, йогурт Чудо 1,8% 50 г' },
+      { meal: 'Обед', dishes: 'Макароны ц/з 250 г, яйца 2, соя 50 г, гречка 100 г' },
+      { meal: 'Добор', dishes: 'Сыворотка 2 мерные ложки (60 г)' },
+    ],
+    items: [
+      { id: 'tvorog5', grams: 350, meal: 'Завтрак' },
+      { id: 'agusha', grams: 140, meal: 'Завтрак' },
+      { id: 'bread_grain', grams: 100, meal: 'Завтрак' },
+      { id: 'blini', grams: 2, meal: 'Перекус' },
+      { id: 'yogurt_chudo', grams: 50, meal: 'Перекус' },
+      { id: 'pasta_ww', grams: 250, meal: 'Обед' },
+      { id: 'egg', grams: 2, meal: 'Обед' },
+      { id: 'soy', grams: 50, meal: 'Обед' },
+      { id: 'buckwheat', grams: 100, meal: 'Обед' },
+      { id: 'whey', grams: 60, meal: 'Добор' },
+    ],
+  },
+  {
+    date: '2026-10-02',
+    menu: [
+      { meal: 'Ночь', dishes: 'Запеканка творожная 100 г, батон 50 г' },
+      { meal: 'Обед', dishes: 'Суп гороховый густой 992 г, хлеб ржаной зерновой 50 г' },
+      { meal: 'Ужин', dishes: 'Творог 5% 350 г, хлеб ржаной 50 г, блины 2, яйца 2, Агуша 90 г' },
+    ],
+    items: [
+      { id: 'zapekanka', grams: 100, meal: 'Ночь' },
+      { id: 'baton', grams: 50, meal: 'Ночь' },
+      { id: 'soup_pea', grams: 992, meal: 'Обед' },
+      { id: 'bread_grain', grams: 50, meal: 'Обед' },
+      { id: 'tvorog5', grams: 350, meal: 'Ужин' },
+      { id: 'bread_rye', grams: 50, meal: 'Ужин' },
+      { id: 'blini', grams: 2, meal: 'Ужин' },
+      { id: 'egg', grams: 2, meal: 'Ужин' },
+      { id: 'agusha', grams: 90, meal: 'Ужин' },
+    ],
+  },
+  {
+    date: '2026-10-03',
+    menu: [
+      { meal: 'Завтрак', dishes: 'Творог 5% 350 г, Агуша 90 г' },
+      {
+        meal: 'Обед',
+        dishes: 'Салат готовый ~231 г (соя 100 + кетчуп 30 + помидоры 2 + брокколи 50), макароны 200 г, хлеб ~120 г',
+      },
+      { meal: 'Ужин', dishes: 'Суп гороховый 300 г, колбаса растительная 30 г, сулугуни 45 г' },
+      { meal: 'Перекус', dishes: 'Печенье овсяное шоколадное 3 шт (~80 г)' },
+    ],
+    items: [
+      { id: 'tvorog5', grams: 350, meal: 'Завтрак' },
+      { id: 'agusha', grams: 90, meal: 'Завтрак' },
+      { id: 'soy', grams: 100, meal: 'Обед' },
+      { id: 'ketchup', grams: 30, meal: 'Обед' },
+      { id: 'tomato', grams: 2, meal: 'Обед' },
+      { id: 'broccoli', grams: 50, meal: 'Обед' },
+      { id: 'pasta', grams: 200, meal: 'Обед' },
+      { id: 'bread_grain', grams: 80, meal: 'Обед' },
+      { id: 'bread_rye', grams: 40, meal: 'Обед' },
+      { id: 'soup_pea', grams: 300, meal: 'Ужин' },
+      { id: 'sausage_plant', grams: 30, meal: 'Ужин' },
+      { id: 'suluguni', grams: 45, meal: 'Ужин' },
+      { id: 'cookie_oat', grams: 80, meal: 'Перекус' },
+    ],
+  },
+  {
+    date: '2026-10-04',
+    menu: [
+      { meal: 'Завтрак', dishes: 'Творог 5% 350 г, Агуша 90 г' },
+      { meal: 'Обед', dishes: 'Яйцо 1, гречка варёная 500 г, брокколи 150 г' },
+      { meal: 'Перекус', dishes: 'Йогурт Чудо 1,8% 70 г, блин 1, яблоки 2 (~360 г)' },
+      { meal: 'Ужин', dishes: 'Фасоль белая консерв. 200 г, сыворотка 2 мерные ложки (60 г)' },
+    ],
+    items: [
+      { id: 'tvorog5', grams: 350, meal: 'Завтрак' },
+      { id: 'agusha', grams: 90, meal: 'Завтрак' },
+      { id: 'egg', grams: 1, meal: 'Обед' },
+      { id: 'buckwheat', grams: 500, meal: 'Обед' },
+      { id: 'broccoli', grams: 150, meal: 'Обед' },
+      { id: 'yogurt_chudo', grams: 70, meal: 'Перекус' },
+      { id: 'blini', grams: 1, meal: 'Перекус' },
+      { id: 'apple', grams: 360, meal: 'Перекус' },
+      { id: 'beans_white', grams: 200, meal: 'Ужин' },
+      { id: 'whey', grams: 60, meal: 'Ужин' },
+    ],
+  },
+  {
+    date: '2026-10-05',
+    note: 'День неполный: зафиксирована ночь/утро до замера веса. Остальное — дописать.',
+    menu: [
+      {
+        meal: 'Ночь',
+        dishes: 'Блины 2 шт, булочка с семечками/зерном ~75 г, вода',
+      },
+    ],
+    items: [
+      { id: 'blini', grams: 2, meal: 'Ночь' },
+      { id: 'bun_seed', grams: 75, meal: 'Ночь' },
+    ],
+  },
+]
 
 export const weightRows = [
   { date: '2026-08-07', label: '07.08', kg: 101.5, note: 'старт' },
@@ -31,6 +140,7 @@ export const weightRows = [
   { date: '2026-09-16', label: '16.09', kg: 97.1, note: 'новый мин.' },
   { date: '2026-09-21', label: '21.09', kg: 97.2, note: '+0.1 после Сб' },
   { date: '2026-09-28', label: '28.09', kg: 97.4, note: 'после A; +0.2' },
+  { date: '2026-10-05', label: '05.10', kg: 97.8, note: 'утро после туалета, до еды; ночь блины+булочка' },
 ]
 
 export const trainRows = [
@@ -137,6 +247,14 @@ export const trainRows = [
     min: 0,
     walkMin: 150,
   },
+  {
+    date: '05.10',
+    type: 'Пн',
+    body: 'вес утро 97.8 (после туалета, до еды/зала); ночь: блины2+булочка с зерном; день еды — дописать; отдых после копки',
+    mark: 'вес/ночь',
+    kind: 'rest',
+    min: 0,
+  },
 ]
 
 export const foodRows = [
@@ -183,6 +301,7 @@ export const foodRows = [
   { date: '02.10', protein: '~140–170', kcal: '~2050–2450' },
   { date: '03.10', protein: '~125–155', kcal: '~1900–2300' },
   { date: '04.10', protein: '~155–185', kcal: '~1900–2200' },
+  { date: '05.10', protein: '~15–25', kcal: '~450–550' },
 ].map((r) => ({
   ...r,
   proteinMid: midRange(r.protein),

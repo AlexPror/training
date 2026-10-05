@@ -10,6 +10,7 @@ export const FOODS = [
   { id: 'zapekanka', name: 'Запеканка творожная', cat: 'Молочка', kcal: 170, p: 14.0, f: 8.0, c: 12 },
   { id: 'baton', name: 'Батон', cat: 'Крупы', kcal: 265, p: 7.5, f: 2.9, c: 53 },
   { id: 'bun_cinnamon', name: 'Булочка с корицей', cat: 'Крупы', kcal: 340, p: 8.0, f: 12.0, c: 50 },
+  { id: 'bun_seed', name: 'Булочка с семечками/зерном', cat: 'Крупы', kcal: 310, p: 9.0, f: 9.0, c: 48 },
   { id: 'egg', name: 'Яйцо С1 (1 шт)', cat: 'Яйца', kcal: 75, p: 6.5, f: 5.2, c: 0.4, unitGrams: 1, unitLabel: 'шт' },
   { id: 'whey', name: 'Сывороточный протеин', cat: 'Протеин', kcal: 370, p: 75, f: 5, c: 8 },
   { id: 'hemp', name: 'Конопляный протеин', cat: 'Протеин', kcal: 380, p: 60, f: 10, c: 15 },

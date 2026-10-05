@@ -1345,6 +1345,100 @@ footer.site {
   color: var(--muted);
 }
 
+.menu-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+.menu-list li {
+  font-size: 0.8rem;
+  line-height: 1.35;
+  color: var(--ink);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.45rem;
+  align-items: baseline;
+}
+.menu-list li strong {
+  color: var(--accent, #0a7a5c);
+  min-width: 4.5rem;
+}
+.food-day-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1rem;
+  align-items: baseline;
+  justify-content: space-between;
+}
+.food-day-head span {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+.food-table-wrap {
+  overflow-x: auto;
+  margin-top: 0.75rem;
+  -webkit-overflow-scrolling: touch;
+}
+.food-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+  line-height: 1.35;
+}
+.food-table th,
+.food-table td {
+  padding: 0.4rem 0.45rem;
+  text-align: left;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  white-space: nowrap;
+}
+.food-table th {
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+.food-table td:nth-child(2) {
+  white-space: normal;
+  min-width: 7rem;
+}
+.food-table tfoot td {
+  border-bottom: none;
+  padding-top: 0.55rem;
+  background: rgba(10, 122, 92, 0.05);
+}
+.food-vs-norm {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.45rem;
+  margin-top: 0.85rem;
+}
+@media (min-width: 520px) {
+  .food-vs-norm {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+.vs-item {
+  padding: 0.45rem 0.55rem;
+  border-radius: 0.35rem;
+  background: rgba(0, 0, 0, 0.03);
+}
+.vs-item .lbl {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+.vs-item .val {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
 @media (max-width: 720px) {
   .gym-hero-kpis,
   .home-kpis {

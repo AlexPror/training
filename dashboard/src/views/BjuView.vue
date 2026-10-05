@@ -1,12 +1,13 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { FOODS, QUICK, macros } from '@/data/foods'
-import { foodRows, meta } from '@/data/alexander'
+import { foodRows, foodDays, meta } from '@/data/alexander'
 import { byChrono } from '@/data/chrono'
 import { LineChart } from '@/components/Charts'
 import ChartSheet from '@/components/ChartSheet.vue'
 import PeriodPicker from '@/components/PeriodPicker.vue'
 import { inPeriod } from '@/lib/period'
+import { amountLabel, dayMacros, fromIsoDate } from '@/lib/dayFood'
 
 const meal = ref([])
 const selected = ref(FOODS[0].id)
@@ -114,8 +115,41 @@ const diaryProteinSets = computed(() => [
   },
 ])
 
+const foodDayByLabel = computed(() => {
+  const map = new Map()
+  for (const d of foodDays) {
+    const macrosDay = dayMacros(d)
+    map.set(fromIsoDate(d.date), {
+      ...d,
+      ...macrosDay,
+      label: fromIsoDate(d.date),
+    })
+  }
+  return map
+})
+
+const selectedDetail = computed(() => {
+  if (!selectedDay.value) return null
+  return foodDayByLabel.value.get(selectedDay.value) || null
+})
+
+watch(
+  diaryDays,
+  (days) => {
+    if (!days.length) {
+      selectedDay.value = null
+      return
+    }
+    const withDetail = days.find((d) => foodDayByLabel.value.has(d.date))
+    if (!selectedDay.value || !days.some((d) => d.date === selectedDay.value)) {
+      selectedDay.value = withDetail?.date || days[0].date
+    }
+  },
+  { immediate: true },
+)
+
 function dayTone(r) {
-  if (r.proteinMid < 140) return 'low'
+  if (r.proteinMid < 140 && r.kcalMid >= 1400) return 'low'
   if (r.kcalMid > 2400) return 'high'
   if (r.proteinMid >= 160 && r.kcalMid >= 1900 && r.kcalMid <= 2200) return 'ok'
   return ''
@@ -139,13 +173,21 @@ function onSelectChange() {
 function round1(n) {
   return Math.round(n * 10) / 10
 }
+
+function ratio(fact, guide) {
+  if (guide == null) return '—'
+  return `${fact} / ${guide}`
+}
+
+const protMid = computed(() => Math.round((meta.targetProtein[0] + meta.targetProtein[1]) / 2))
+const kcalMidTarget = computed(() => Math.round((meta.targetKcal[0] + meta.targetKcal[1]) / 2))
 </script>
 
 <template>
   <div>
     <h1 class="page-title">БЖУ</h1>
     <p class="page-sub">
-      Дневник и калькулятор. Цель: белок {{ meta.targetProtein.join('–') }} · ккал {{ meta.targetKcal.join('–') }}.
+      Дневник как у детей: меню + таблица продуктов. Цель: белок {{ meta.targetProtein.join('–') }} · ккал {{ meta.targetKcal.join('–') }}.
     </p>
 
     <PeriodPicker
@@ -189,6 +231,11 @@ function round1(n) {
       </button>
     </div>
 
+    <div class="section-label">
+      <h2>День</h2>
+      <span class="hint">таблица и итог</span>
+    </div>
+
     <div class="food-day-tabs">
       <button
         v-for="d in diaryDays"
@@ -197,17 +244,87 @@ function round1(n) {
         class="food-day-tab"
         :data-tone="dayTone(d)"
         :data-active="selectedDay === d.date ? '1' : null"
-        @click="selectedDay = selectedDay === d.date ? null : d.date"
+        @click="selectedDay = d.date"
       >
         <span class="food-day-d">{{ d.date }}</span>
         <span class="food-day-k">{{ Math.round(d.kcalMid) }}</span>
         <span class="food-day-p">{{ Math.round(d.proteinMid) }}б</span>
       </button>
     </div>
-    <p v-if="selectedDay" class="note">
+
+    <div v-if="selectedDetail" class="panel food-day group-gap">
+      <div class="food-day-head">
+        <strong>{{ selectedDetail.label }}</strong>
+        <span>факт / ориентир</span>
+      </div>
+      <p v-if="selectedDetail.note" class="note" style="margin:0.35rem 0 0">{{ selectedDetail.note }}</p>
+
+      <ul v-if="selectedDetail.menu?.length" class="menu-list" style="margin-top:0.55rem">
+        <li v-for="(m, i) in selectedDetail.menu" :key="'m'+i">
+          <strong>{{ m.meal }}:</strong> {{ m.dishes }}
+        </li>
+      </ul>
+
+      <div class="food-table-wrap">
+        <table class="food-table">
+          <thead>
+            <tr>
+              <th>Приём</th>
+              <th>Продукт</th>
+              <th>Кол-во</th>
+              <th>ккал</th>
+              <th>Б</th>
+              <th>Ж</th>
+              <th>У</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(row, i) in selectedDetail.rows" :key="row.id + '-' + i">
+              <td>{{ row.meal || '—' }}</td>
+              <td>{{ row.name }}</td>
+              <td>{{ amountLabel(row) }}</td>
+              <td>{{ row.kcal }}</td>
+              <td>{{ row.p }}</td>
+              <td>{{ row.f }}</td>
+              <td>{{ row.c }}</td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="3"><strong>Итого</strong></td>
+              <td><strong>{{ selectedDetail.kcal }}</strong></td>
+              <td><strong>{{ selectedDetail.p }}</strong></td>
+              <td><strong>{{ selectedDetail.f }}</strong></td>
+              <td><strong>{{ selectedDetail.c }}</strong></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <div class="food-vs-norm">
+        <div class="vs-item">
+          <span class="lbl">ккал</span>
+          <span class="val">{{ ratio(selectedDetail.kcal, kcalMidTarget) }}</span>
+        </div>
+        <div class="vs-item">
+          <span class="lbl">Б</span>
+          <span class="val">{{ ratio(selectedDetail.p, protMid) }}</span>
+        </div>
+        <div class="vs-item">
+          <span class="lbl">Ж</span>
+          <span class="val">{{ selectedDetail.f }}</span>
+        </div>
+        <div class="vs-item">
+          <span class="lbl">У</span>
+          <span class="val">{{ selectedDetail.c }}</span>
+        </div>
+      </div>
+    </div>
+    <p v-else-if="selectedDay" class="note group-gap">
       {{ selectedDay }}:
       {{ foodRows.find((r) => r.date === selectedDay)?.kcal }} ккал ·
       {{ foodRows.find((r) => r.date === selectedDay)?.protein }} белка
+      · подробной таблицы пока нет (есть с 01.10)
       · ориентир {{ meta.targetKcal.join('–') }} / {{ meta.targetProtein.join('–') }}
     </p>
     <p v-if="!diaryDays.length" class="hint-line">Нет дней еды в этом периоде.</p>
