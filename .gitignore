@@ -1,0 +1,16 @@
+# Dependencies
+dashboard/node_modules/
+
+# Logs / local
+*.log
+*.local
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+# Python / local servers
+__pycache__/
+*.pyc

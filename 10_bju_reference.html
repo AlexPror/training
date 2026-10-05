@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Справочник БЖУ — расчёт питания</title>
+  <style>
+    :root {
+      --bg: #f0ebe3;
+      --ink: #1a1f16;
+      --muted: #5c6560;
+      --card: #fffcf7;
+      --line: #d4cbb8;
+      --accent: #2f5d50;
+      --accent-soft: #e7f0ea;
+      --warn: #8b4513;
+      --ok: #2f5d50;
+      --p: #2f5d50;
+      --f: #8b5a2b;
+      --c: #4a6fa5;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background:
+        radial-gradient(ellipse at 0% 0%, #e7f0ea 0%, transparent 50%),
+        radial-gradient(ellipse at 100% 0%, #f5e6d3 0%, transparent 45%),
+        var(--bg);
+      color: var(--ink);
+      line-height: 1.45;
+      padding: 1.25rem;
+    }
+    .wrap { max-width: 1100px; margin: 0 auto; }
+    .nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 1rem;
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+    }
+    .nav a { color: var(--accent); text-decoration: none; }
+    .nav a:hover { text-decoration: underline; }
+    h1 { font-size: 1.5rem; margin: 0 0 0.25rem; letter-spacing: -0.02em; }
+    .sub { color: var(--muted); margin-bottom: 1.25rem; font-size: 0.95rem; }
+    section {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 1rem 1.1rem 1.2rem;
+      margin-bottom: 1rem;
+    }
+    h2 { font-size: 1.05rem; margin: 0 0 0.75rem; color: var(--accent); }
+    h3 { font-size: 0.92rem; margin: 1rem 0 0.5rem; color: var(--muted); font-weight: 600; }
+    .targets {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.6rem;
+    }
+    @media (max-width: 700px) {
+      .targets { grid-template-columns: 1fr 1fr; }
+    }
+    .t-card {
+      background: var(--accent-soft);
+      border-radius: 10px;
+      padding: 0.7rem 0.8rem;
+    }
+    .t-card .lbl { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+    .t-card .val { font-size: 1.15rem; font-weight: 700; margin-top: 0.15rem; }
+    .layout {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 1rem;
+    }
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; }
+    }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      align-items: end;
+      margin-bottom: 0.75rem;
+    }
+    label { font-size: 0.8rem; color: var(--muted); display: block; margin-bottom: 0.2rem; }
+    select, input[type="number"], input[type="search"], input[type="text"] {
+      font: inherit;
+      padding: 0.45rem 0.55rem;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      min-width: 0;
+    }
+    select { min-width: 200px; flex: 1; }
+    input[type="number"] { width: 90px; }
+    input[type="search"] { width: 100%; margin-bottom: 0.75rem; }
+    button {
+      font: inherit;
+      border: none;
+      border-radius: 8px;
+      padding: 0.5rem 0.9rem;
+      cursor: pointer;
+      background: var(--accent);
+      color: #fff;
+      font-weight: 600;
+    }
+    button.secondary {
+      background: transparent;
+      color: var(--accent);
+      border: 1px solid var(--line);
+    }
+    button:hover { filter: brightness(1.05); }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.86rem;
+    }
+    th, td {
+      text-align: left;
+      padding: 0.4rem 0.45rem;
+      border-bottom: 1px solid var(--line);
+      vertical-align: middle;
+    }
+    th {
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    tr:last-child td { border-bottom: none; }
+    .num { text-align: right; font-variant-numeric: tabular-nums; }
+    .b { color: var(--p); font-weight: 600; }
+    .f { color: var(--f); }
+    .c { color: var(--c); }
+    .totals {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+    }
+    .tot {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 0.65rem 0.75rem;
+      text-align: center;
+    }
+    .tot .lbl { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; }
+    .tot .val { font-size: 1.25rem; font-weight: 700; margin-top: 0.1rem; }
+    .bar-wrap { margin-top: 0.85rem; }
+    .bar-row { margin-bottom: 0.55rem; }
+    .bar-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.82rem;
+      margin-bottom: 0.2rem;
+    }
+    .bar {
+      height: 10px;
+      background: #ebe4d8;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .bar > span {
+      display: block;
+      height: 100%;
+      border-radius: 6px;
+      width: 0;
+      transition: width 0.2s;
+    }
+    .bar.p > span { background: var(--p); }
+    .bar.k > span { background: var(--accent); }
+    .bar.warn > span { background: var(--warn); }
+    .status { font-size: 0.85rem; margin-top: 0.5rem; color: var(--muted); }
+    .status.ok { color: var(--ok); font-weight: 600; }
+    .status.high { color: var(--warn); font-weight: 600; }
+    .status.low { color: var(--warn); }
+    .note { font-size: 0.85rem; color: var(--muted); margin-top: 0.75rem; }
+    .chip {
+      display: inline-block;
+      font-size: 0.72rem;
+      padding: 0.1rem 0.4rem;
+      border-radius: 5px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      margin-left: 0.35rem;
+    }
+    .ref-cat { margin-bottom: 0.35rem; }
+    button.linkish {
+      background: none;
+      border: none;
+      color: var(--accent);
+      padding: 0;
+      font-weight: 600;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+    .qty-btn {
+      background: var(--accent-soft);
+      color: var(--accent);
+      padding: 0.2rem 0.45rem;
+      font-size: 0.78rem;
+      margin-left: 0.2rem;
+    }
+    .empty { color: var(--muted); font-size: 0.9rem; padding: 0.5rem 0; }
+    footer { margin-top: 0.5rem; font-size: 0.8rem; color: var(--muted); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <nav class="nav">
+      <a href="index.html">← Главная</a>
+      <a href="04_my_progress_charts.html">Александр</a>
+      <a href="08_anna_progress_charts.html">Анна</a>
+      <a href="diary_day.html">Дневник</a>
+    </nav>
+
+    <h1>Справочник БЖУ</h1>
+    <p class="sub">
+      Продукты из рациона Александра · на 100 г / порцию · калькулятор дня<br />
+      Цель: белок <b>160–180 г</b> · ккал <b>1900–2200</b> · ±10–15% (варка, жирность, масло)
+    </p>
+
+    <section>
+      <h2>Цели дня</h2>
+      <div class="targets">
+        <div class="t-card"><div class="lbl">Ккал</div><div class="val">1900–2200</div></div>
+        <div class="t-card"><div class="lbl">Белок</div><div class="val">160–180 г</div></div>
+        <div class="t-card"><div class="lbl">Жир (ориентир)</div><div class="val">50–80 г</div></div>
+        <div class="t-card"><div class="lbl">Углеводы</div><div class="val">остаток</div></div>
+      </div>
+    </section>
+
+    <div class="layout">
+      <section>
+        <h2>Калькулятор приёма / дня</h2>
+        <div class="controls">
+          <div style="flex: 2; min-width: 180px;">
+            <label for="foodSelect">Продукт</label>
+            <select id="foodSelect"></select>
+          </div>
+          <div>
+            <label for="grams">Граммы</label>
+            <input id="grams" type="number" min="1" step="1" value="100" />
+          </div>
+          <button type="button" id="addBtn">Добавить</button>
+          <button type="button" class="secondary" id="clearBtn">Очистить</button>
+        </div>
+        <p class="note" id="unitHint" style="margin-top: 0;"></p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Продукт</th>
+              <th class="num">г</th>
+              <th class="num">ккал</th>
+              <th class="num">Б</th>
+              <th class="num">Ж</th>
+              <th class="num">У</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="mealBody"></tbody>
+        </table>
+        <div id="mealEmpty" class="empty">Пока пусто — выбери продукт и граммы, или нажми продукт в справочнике ниже.</div>
+
+        <div class="totals">
+          <div class="tot"><div class="lbl">Ккал</div><div class="val" id="sumK">0</div></div>
+          <div class="tot"><div class="lbl">Белок</div><div class="val b" id="sumB">0</div></div>
+          <div class="tot"><div class="lbl">Жир</div><div class="val f" id="sumF">0</div></div>
+          <div class="tot"><div class="lbl">Углеводы</div><div class="val c" id="sumC">0</div></div>
+        </div>
+
+        <div class="bar-wrap">
+          <div class="bar-row">
+            <div class="bar-meta"><span>Белок к цели 160–180</span><span id="pMeta">0 / 170</span></div>
+            <div class="bar p" id="pBar"><span></span></div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-meta"><span>Ккал к коридору 1900–2200</span><span id="kMeta">0 / 2050</span></div>
+            <div class="bar k" id="kBar"><span></span></div>
+          </div>
+          <p class="status" id="dayStatus">Добавь еду — сравним с целью дня.</p>
+        </div>
+      </section>
+
+      <section>
+        <h2>Быстрый добор</h2>
+        <p class="note" style="margin-top: 0;">Нажми — добавит типичную порцию в калькулятор.</p>
+        <div id="quickAdds"></div>
+        <h3>Сколько белка в порции</h3>
+        <table>
+          <thead><tr><th>Порция</th><th class="num">Б ≈</th><th class="num">ккал ≈</th></tr></thead>
+          <tbody id="portionTips"></tbody>
+        </table>
+      </section>
+    </div>
+
+    <section>
+      <h2>Справочник на 100 г <span class="chip">или 1 шт</span></h2>
+      <input type="search" id="search" placeholder="Поиск: творог, фасоль, яйцо…" />
+      <div id="refTables"></div>
+      <p class="note">
+        Крупы/бобовые/макароны — <b>варёные</b> (как в дневнике). Соя — размоченная/варёная.
+        Домашний творог жирнее 5% — ккал выше. Масло в тушении не учтено, пока не добавишь «масло 1 ст.л.».
+      </p>
+    </section>
+
+    <footer>
+      Файл: <code>10_bju_reference.html</code> · данные ориентировочные для локального учёта
+    </footer>
+  </div>
+
+  <script>
+    /** per100: на 100 г; unitGrams: если порция (яйцо, ст.л.) */
+    const FOODS = [
+      // Молочка / белок
+      { id: "tvorog5", name: "Творог 5%", cat: "Молочка", kcal: 121, p: 17.2, f: 5.0, c: 1.8 },
+      { id: "tvorog_home", name: "Творог домашний (~9%)", cat: "Молочка", kcal: 160, p: 16.0, f: 9.0, c: 2.0 },
+      { id: "agusha", name: "Агуша творожок", cat: "Молочка", kcal: 92, p: 7.0, f: 4.2, c: 5.5 },
+      { id: "ryazhenka", name: "Ряженка ~4%", cat: "Молочка", kcal: 67, p: 3.0, f: 4.0, c: 4.2 },
+      { id: "kefir32", name: "Кефир 3,2%", cat: "Молочка", kcal: 56, p: 2.9, f: 3.2, c: 4.0 },
+      { id: "milk25", name: "Молоко 2,5%", cat: "Молочка", kcal: 52, p: 2.8, f: 2.5, c: 4.7 },
+      { id: "egg", name: "Яйцо С1 (1 шт)", cat: "Яйца", kcal: 75, p: 6.5, f: 5.2, c: 0.4, unitGrams: 1, unitLabel: "шт" },
+      { id: "whey", name: "Сывороточный протеин (порошок)", cat: "Протеин", kcal: 370, p: 75, f: 5, c: 8 },
+      { id: "hemp", name: "Конопляный протеин (порошок)", cat: "Протеин", kcal: 380, p: 60, f: 10, c: 15 },
+      // Крупы / крахмал
+      { id: "buckwheat", name: "Гречка варёная", cat: "Крупы", kcal: 110, p: 4.2, f: 1.1, c: 20 },
+      { id: "pasta_ww", name: "Макароны ц/з варёные", cat: "Крупы", kcal: 124, p: 5.0, f: 1.5, c: 23 },
+      { id: "rice", name: "Рис варёный", cat: "Крупы", kcal: 116, p: 2.2, f: 0.5, c: 25 },
+      { id: "potato", name: "Картошка тушёная", cat: "Крупы", kcal: 82, p: 2.0, f: 2.0, c: 14 },
+      { id: "bread_rye", name: "Хлеб ржаной", cat: "Крупы", kcal: 220, p: 6.6, f: 1.2, c: 44 },
+      { id: "bread_grain", name: "Хлеб зерновой", cat: "Крупы", kcal: 250, p: 8.0, f: 3.5, c: 45 },
+      // Бобовые
+      { id: "beans_white", name: "Фасоль белая варёная", cat: "Бобовые", kcal: 127, p: 8.2, f: 0.5, c: 21 },
+      { id: "beans_red", name: "Фасоль красная варёная", cat: "Бобовые", kcal: 127, p: 8.4, f: 0.5, c: 21 },
+      { id: "lentil", name: "Чечевица варёная", cat: "Бобовые", kcal: 116, p: 9.0, f: 0.4, c: 20 },
+      { id: "soy", name: "Соя размоч./варёная", cat: "Бобовые", kcal: 173, p: 16.6, f: 9.0, c: 10 },
+      { id: "soup_pea", name: "Суп гороховый густой", cat: "Бобовые", kcal: 70, p: 4.0, f: 2.0, c: 9 },
+      { id: "soup_bean", name: "Суп фасолевый (по фасоли в порции)", cat: "Бобовые", kcal: 90, p: 5.5, f: 2.0, c: 12 },
+      { id: "soup_noodle", name: "Суп с лапшой", cat: "Бобовые", kcal: 65, p: 3.0, f: 2.0, c: 9 },
+      { id: "pizza4", name: "Пицца 4 сыра", cat: "Крупы", kcal: 270, p: 12.0, f: 12.0, c: 28 },
+      { id: "juice_apple", name: "Сок яблочный", cat: "Овощи/фрукты", kcal: 46, p: 0.1, f: 0.1, c: 11 },
+      { id: "asparagus", name: "Спаржа", cat: "Овощи/фрукты", kcal: 20, p: 2.2, f: 0.1, c: 3.9 },
+      // Овощи / фрукты
+      { id: "cauli", name: "Цветная капуста", cat: "Овощи/фрукты", kcal: 30, p: 2.5, f: 0.3, c: 4.5 },
+      { id: "zucchini", name: "Кабачки", cat: "Овощи/фрукты", kcal: 24, p: 1.2, f: 0.3, c: 4.5 },
+      { id: "salad", name: "Салат овощной (без масла)", cat: "Овощи/фрукты", kcal: 25, p: 1.2, f: 0.2, c: 4 },
+      { id: "apple", name: "Яблоко", cat: "Овощи/фрукты", kcal: 52, p: 0.3, f: 0.2, c: 14 },
+      { id: "pear", name: "Груша", cat: "Овощи/фрукты", kcal: 57, p: 0.4, f: 0.1, c: 15 },
+      { id: "plum", name: "Слива", cat: "Овощи/фрукты", kcal: 46, p: 0.7, f: 0.3, c: 10 },
+      // Жиры
+      { id: "walnut", name: "Грецкий орех", cat: "Жиры", kcal: 654, p: 15.2, f: 65.2, c: 13.7 },
+      { id: "oil_tbsp", name: "Масло растительное (1 ст.л.)", cat: "Жиры", kcal: 90, p: 0, f: 10, c: 0, unitGrams: 1, unitLabel: "ст.л." },
+    ];
+
+    const QUICK = [
+      { id: "tvorog5", g: 350, label: "Творог 5% 350 г" },
+      { id: "tvorog5", g: 400, label: "Творог 5% 400 г" },
+      { id: "egg", g: 4, label: "4 яйца" },
+      { id: "egg", g: 3, label: "3 яйца" },
+      { id: "pasta_ww", g: 250, label: "Макароны ц/з 250 г" },
+      { id: "pasta_ww", g: 300, label: "Макароны ц/з 300 г" },
+      { id: "buckwheat", g: 300, label: "Гречка 300 г" },
+      { id: "beans_white", g: 200, label: "Фасоль 200 г" },
+      { id: "soy", g: 100, label: "Соя 100 г" },
+      { id: "hemp", g: 30, label: "Конопля ~2 ст.л. (30 г)" },
+      { id: "whey", g: 30, label: "Сыворотка 1 ложка (30 г)" },
+      { id: "bread_rye", g: 50, label: "Хлеб 50 г" },
+    ];
+
+    const PORTION_TIPS = [
+      { label: "Творог 5% 350 г", p: 60, k: 424 },
+      { label: "4 яйца", p: 26, k: 300 },
+      { label: "Фасоль варёная 200 г", p: 16, k: 254 },
+      { label: "Соя размоч. 100 г", p: 17, k: 173 },
+      { label: "Сыворотка 1×30 г", p: 22, k: 111 },
+      { label: "Конопля 2 ст.л. (~30 г)", p: 18, k: 114 },
+      { label: "Макароны ц/з 250 г вар.", p: 12, k: 310 },
+      { label: "Гречка 300 г вар.", p: 13, k: 330 },
+    ];
+
+    const meal = []; // { id, grams, uid }
+
+    function foodById(id) {
+      return FOODS.find(f => f.id === id);
+    }
+
+    function macros(food, grams) {
+      const factor = food.unitGrams ? grams : grams / 100;
+      return {
+        kcal: food.kcal * factor,
+        p: food.p * factor,
+        f: food.f * factor,
+        c: food.c * factor,
+      };
+    }
+
+    function round1(n) {
+      return Math.round(n * 10) / 10;
+    }
+
+    function fillSelect() {
+      const sel = document.getElementById("foodSelect");
+      const cats = [...new Set(FOODS.map(f => f.cat))];
+      sel.innerHTML = cats.map(cat => {
+        const opts = FOODS.filter(f => f.cat === cat)
+          .map(f => `<option value="${f.id}">${f.name}</option>`)
+          .join("");
+        return `<optgroup label="${cat}">${opts}</optgroup>`;
+      }).join("");
+      updateUnitHint();
+    }
+
+    function updateUnitHint() {
+      const food = foodById(document.getElementById("foodSelect").value);
+      const hint = document.getElementById("unitHint");
+      const grams = document.getElementById("grams");
+      if (!food) return;
+      if (food.unitGrams) {
+        hint.textContent = `Единица: ${food.unitLabel}. В поле «Граммы» укажи количество (${food.unitLabel}).`;
+        if (Number(grams.value) > 20 && food.id === "egg") grams.value = 2;
+        if (food.id === "oil_tbsp" && Number(grams.value) > 5) grams.value = 1;
+      } else {
+        hint.textContent = `На 100 г: ${food.kcal} ккал · Б ${food.p} · Ж ${food.f} · У ${food.c}`;
+      }
+    }
+
+    function addFood(id, grams) {
+      const food = foodById(id);
+      if (!food || !grams || grams <= 0) return;
+      meal.push({ id, grams: Number(grams), uid: Date.now() + Math.random() });
+      renderMeal();
+    }
+
+    function removeFood(uid) {
+      const i = meal.findIndex(m => m.uid === uid);
+      if (i >= 0) meal.splice(i, 1);
+      renderMeal();
+    }
+
+    function renderMeal() {
+      const body = document.getElementById("mealBody");
+      const empty = document.getElementById("mealEmpty");
+      if (!meal.length) {
+        body.innerHTML = "";
+        empty.style.display = "block";
+      } else {
+        empty.style.display = "none";
+        body.innerHTML = meal.map(row => {
+          const food = foodById(row.id);
+          const m = macros(food, row.grams);
+          const unit = food.unitLabel || "г";
+          return `<tr>
+            <td>${food.name}</td>
+            <td class="num">${row.grams} ${unit}</td>
+            <td class="num">${Math.round(m.kcal)}</td>
+            <td class="num b">${round1(m.p)}</td>
+            <td class="num f">${round1(m.f)}</td>
+            <td class="num c">${round1(m.c)}</td>
+            <td><button type="button" class="secondary" style="padding:0.2rem 0.45rem;font-size:0.75rem" data-uid="${row.uid}">×</button></td>
+          </tr>`;
+        }).join("");
+        body.querySelectorAll("button[data-uid]").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const uid = btn.getAttribute("data-uid");
+            const i = meal.findIndex(m => String(m.uid) === uid);
+            if (i >= 0) meal.splice(i, 1);
+            renderMeal();
+          });
+        });
+      }
+
+      let sk = 0, sb = 0, sf = 0, sc = 0;
+      meal.forEach(row => {
+        const m = macros(foodById(row.id), row.grams);
+        sk += m.kcal; sb += m.p; sf += m.f; sc += m.c;
+      });
+      document.getElementById("sumK").textContent = Math.round(sk);
+      document.getElementById("sumB").textContent = round1(sb);
+      document.getElementById("sumF").textContent = round1(sf);
+      document.getElementById("sumC").textContent = round1(sc);
+
+      const pPct = Math.min(100, (sb / 180) * 100);
+      const kPct = Math.min(100, (sk / 2200) * 100);
+      document.querySelector("#pBar span").style.width = pPct + "%";
+      document.querySelector("#kBar span").style.width = kPct + "%";
+      document.getElementById("pMeta").textContent = `${round1(sb)} / 170 (цель)`;
+      document.getElementById("kMeta").textContent = `${Math.round(sk)} / 2050 (середина)`;
+
+      const kBar = document.getElementById("kBar");
+      kBar.classList.toggle("warn", sk > 2200);
+      kBar.classList.toggle("k", sk <= 2200);
+
+      const st = document.getElementById("dayStatus");
+      if (!meal.length) {
+        st.className = "status";
+        st.textContent = "Добавь еду — сравним с целью дня.";
+      } else if (sb < 140) {
+        st.className = "status low";
+        st.textContent = `Белка мало (−${round1(160 - sb)} г до низа цели). Добери творог / яйца / протеин.`;
+      } else if (sb < 160) {
+        st.className = "status low";
+        st.textContent = `Белок нижняя граница. Ещё ~${round1(160 - sb)}–${round1(180 - sb)} г до цели.`;
+      } else if (sk > 2200) {
+        st.className = "status high";
+        st.textContent = `Белок ок (${round1(sb)} г). Ккал выше потолка (+${Math.round(sk - 2200)}).`;
+      } else if (sk < 1900 && sb >= 160) {
+        st.className = "status ok";
+        st.textContent = `Белок закрыт (${round1(sb)} г). Ккал ниже коридора — можно ещё крахмал/овощи.`;
+      } else {
+        st.className = "status ok";
+        st.textContent = `В коридоре: белок ${round1(sb)} г, ккал ~${Math.round(sk)}.`;
+      }
+    }
+
+    function renderQuick() {
+      const box = document.getElementById("quickAdds");
+      box.innerHTML = QUICK.map(q => {
+        const food = foodById(q.id);
+        const m = macros(food, q.g);
+        return `<button type="button" class="qty-btn" data-id="${q.id}" data-g="${q.g}" title="${Math.round(m.kcal)} ккал, Б ${round1(m.p)}">${q.label}</button> `;
+      }).join("");
+      box.querySelectorAll("button").forEach(btn => {
+        btn.addEventListener("click", () => addFood(btn.dataset.id, Number(btn.dataset.g)));
+      });
+
+      document.getElementById("portionTips").innerHTML = PORTION_TIPS.map(t =>
+        `<tr><td>${t.label}</td><td class="num b">${t.p}</td><td class="num">${t.k}</td></tr>`
+      ).join("");
+    }
+
+    function renderRef(filter = "") {
+      const q = filter.trim().toLowerCase();
+      const list = FOODS.filter(f => !q || f.name.toLowerCase().includes(q) || f.cat.toLowerCase().includes(q));
+      const cats = [...new Set(list.map(f => f.cat))];
+      const root = document.getElementById("refTables");
+      root.innerHTML = cats.map(cat => {
+        const rows = list.filter(f => f.cat === cat).map(f => {
+          const unit = f.unitLabel ? ` / ${f.unitLabel}` : " / 100 г";
+          return `<tr>
+            <td><button type="button" class="linkish" data-id="${f.id}">${f.name}</button><span class="chip">${unit.trim()}</span></td>
+            <td class="num">${f.kcal}</td>
+            <td class="num b">${f.p}</td>
+            <td class="num f">${f.f}</td>
+            <td class="num c">${f.c}</td>
+            <td><button type="button" class="qty-btn" data-id="${f.id}" data-g="${f.unitGrams ? 1 : 100}">+${f.unitGrams ? "1" : "100"}</button></td>
+          </tr>`;
+        }).join("");
+        return `<div class="ref-cat"><h3>${cat}</h3>
+          <table>
+            <thead><tr><th>Продукт</th><th class="num">ккал</th><th class="num">Б</th><th class="num">Ж</th><th class="num">У</th><th></th></tr></thead>
+            <tbody>${rows}</tbody>
+          </table></div>`;
+      }).join("") || "<p class='empty'>Ничего не найдено.</p>";
+
+      root.querySelectorAll("button[data-id]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const id = btn.dataset.id;
+          const food = foodById(id);
+          const g = btn.dataset.g ? Number(btn.dataset.g) : (food.unitGrams ? 1 : 100);
+          document.getElementById("foodSelect").value = id;
+          document.getElementById("grams").value = g;
+          updateUnitHint();
+          if (btn.classList.contains("qty-btn") || btn.classList.contains("linkish")) {
+            if (btn.classList.contains("qty-btn")) addFood(id, g);
+            else {
+              // linkish: select only, or add default
+              addFood(id, g);
+            }
+          }
+        });
+      });
+    }
+
+    document.getElementById("foodSelect").addEventListener("change", updateUnitHint);
+    document.getElementById("addBtn").addEventListener("click", () => {
+      addFood(document.getElementById("foodSelect").value, Number(document.getElementById("grams").value));
+    });
+    document.getElementById("clearBtn").addEventListener("click", () => {
+      meal.length = 0;
+      renderMeal();
+    });
+    document.getElementById("search").addEventListener("input", e => renderRef(e.target.value));
+    document.getElementById("grams").addEventListener("keydown", e => {
+      if (e.key === "Enter") document.getElementById("addBtn").click();
+    });
+
+    fillSelect();
+    renderQuick();
+    renderRef();
+    renderMeal();
+  </script>
+</body>
+</html>

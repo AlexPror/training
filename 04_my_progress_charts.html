@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Прогресс — вес и тренировки</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg: #f3efe6;
+      --ink: #1a1f16;
+      --muted: #5c6560;
+      --card: #fffcf5;
+      --line: #d4cbb8;
+      --accent: #2f5d50;
+      --warn: #8b4513;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background:
+        radial-gradient(ellipse at 10% 0%, #e7f0ea 0%, transparent 45%),
+        radial-gradient(ellipse at 90% 10%, #f5e6d3 0%, transparent 40%),
+        var(--bg);
+      color: var(--ink);
+      line-height: 1.45;
+      padding: 1.25rem;
+    }
+    h1 { font-size: 1.5rem; margin: 0 0 0.25rem; letter-spacing: -0.02em; }
+    .sub { color: var(--muted); margin-bottom: 1.25rem; font-size: 0.95rem; }
+    section {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 1rem 1.1rem 1.2rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 1px 0 rgba(0,0,0,0.04);
+    }
+    h2 { font-size: 1.05rem; margin: 0 0 0.75rem; color: var(--accent); }
+    .chart-wrap { position: relative; height: 280px; max-width: 720px; }
+    .chart-wrap.wide { max-width: 960px; height: 300px; }
+    .charts-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    @media (max-width: 900px) {
+      .charts-2 { grid-template-columns: 1fr; }
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+    th, td {
+      text-align: left;
+      padding: 0.45rem 0.5rem;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+    }
+    th { color: var(--muted); font-weight: 600; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em; }
+    tr:last-child td { border-bottom: none; }
+    .ok { color: var(--accent); font-weight: 600; }
+    .debt { color: var(--warn); }
+    .note { font-size: 0.85rem; color: var(--muted); margin-top: 0.75rem; }
+    @media (max-width: 640px) {
+      body { padding: 0.75rem; }
+      .chart-wrap { height: 240px; }
+      table { font-size: 0.8rem; }
+    }
+  </style>
+</head>
+<body>
+  <p style="margin:0 0 0.75rem;font-size:0.9rem"><a href="index.html" style="color:#2f5d50">← Главная</a> · <a href="10_bju_reference.html" style="color:#2f5d50">Справочник БЖУ</a> · <a href="08_anna_progress_charts.html" style="color:#2f5d50">Анна</a></p>
+  <h1>Прогресс: вес, повторы и питание</h1>
+  <p class="sub">Александр · 180 см · план v1.8 · обновлено 14.09.2026<br />
+  Данные: <code>04_my_progress.txt</code> + блок SCRIPT ниже. Цель: белок 160–180 г · ккал <b>1900–2200</b> (v1.7).</p>
+
+  <section>
+    <h2>График веса</h2>
+    <div class="chart-wrap"><canvas id="weightChart"></canvas></div>
+    <p class="note">Точки: старт ≈101.5 → 100.3 (10.08) → 100.0 → 99.1 (17.08). Талия узкая: 95 → 94. Бёдра 108 → 108. Пузо 100 → 100.</p>
+  </section>
+
+  <section>
+    <h2>Таблица веса и замеров</h2>
+    <table>
+      <thead>
+        <tr><th>Дата</th><th>Вес</th><th>Талия</th><th>Бёдра</th><th>Икры</th><th>Заметка</th></tr>
+      </thead>
+      <tbody id="weightTable"></tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>График: подтягивания — макс. один подход</h2>
+    <div class="chart-wrap"><canvas id="pullChart"></canvas></div>
+    <p class="note">Цель <b>25 чистых в одном подходе</b>. Точки — лучший сет дня (не сумма лесенки). Пунктир = 25.</p>
+  </section>
+
+  <section>
+    <h2>График: подтягивания — объём за сессию</h2>
+    <div class="chart-wrap"><canvas id="pullVolChart"></canvas></div>
+    <p class="note">Сумма повторов / лесенка за тренировку (вспомогательный объём, не цель 25×1).</p>
+  </section>
+
+  <section>
+    <h2>График: отжимания за сессию (повторы)</h2>
+    <div class="chart-wrap wide"><canvas id="pushChart"></canvas></div>
+    <p class="note">Алмазные / кулаки / смешанные — суммарный объём за тренировку.</p>
+  </section>
+
+  <section>
+    <h2>График: ключевые силовые (повторы / сессия)</h2>
+    <div class="chart-wrap wide"><canvas id="liftsChart"></canvas></div>
+    <p class="note">Жим 2×16: сумма подходов. Мост: рабочие повторы (без «+5»). Взятие: сумма за день.</p>
+  </section>
+
+  <section>
+    <h2>Журнал тренировок</h2>
+    <table>
+      <thead>
+        <tr><th>Дата</th><th>Тип</th><th>Содержание</th><th>Оценка</th></tr>
+      </thead>
+      <tbody id="trainTable"></tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Прогресс упражнений</h2>
+    <table>
+      <thead>
+        <tr><th>Упражнение</th><th>Было</th><th>Сейчас / пик</th><th>Тренд</th></tr>
+      </thead>
+      <tbody id="exTable"></tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Питание — графики</h2>
+    <div class="charts-2">
+      <div>
+        <h2 style="font-size:0.95rem;margin-bottom:0.5rem">Ккал (середина оценки)</h2>
+        <div class="chart-wrap"><canvas id="kcalChart"></canvas></div>
+      </div>
+      <div>
+        <h2 style="font-size:0.95rem;margin-bottom:0.5rem">Белок, г (середина оценки)</h2>
+        <div class="chart-wrap"><canvas id="proteinChart"></canvas></div>
+      </div>
+    </div>
+    <p class="note">Пунктир: цель ккал <b>1900–2200</b> · белок 160–180. Неполные дни (только завтрак) скрыты с графика.</p>
+  </section>
+
+  <section>
+    <h2>Питание (сводка)</h2>
+    <table>
+      <thead>
+        <tr><th>Дата</th><th>Белок</th><th>Ккал</th><th>Заметка</th></tr>
+      </thead>
+      <tbody id="foodTable"></tbody>
+    </table>
+    <p class="note">Цель: белок 160–180 г · ккал ~1900–2200 (v1.7)</p>
+  </section>
+
+  <script>
+    // ========== DATA: дописывай сюда ==========
+    const weightRows = [
+      { date: "2026-08-07", label: "07.08 старт", kg: 101.5, waist: "—", hips: "—", calves: "—", note: "старт плана ≈" },
+      { date: "2026-08-10", label: "10.08", kg: 100.3, waist: "95 / пузо 100", hips: "108", calves: "44", note: "грудь 109, биц 38, бедро середина 65" },
+      { date: "2026-08-12", label: "12.08", kg: 100.0, waist: "—", hips: "—", calves: "—", note: "утро, день A" },
+      { date: "2026-08-15", label: "15.08", kg: 100.0, waist: "—", hips: "—", calves: "—", note: "утро сб, плато" },
+      { date: "2026-08-17", label: "17.08", kg: 99.1, waist: "94 / пузо 100", hips: "108", calves: "43", note: "грудь 107, биц 39; бедро 46 ≠ точка 65" },
+      { date: "2026-08-24", label: "24.08", kg: 98.1, waist: "≈17.08", hips: "≈", calves: "—", note: "см перезамер след. нед; −1.0 от 17.08" },
+      { date: "2026-08-31", label: "31.08", kg: 98.3, waist: "—", hips: "—", calves: "—", note: "+0.2 vs 24.08; соль/вода?" },
+      { date: "2026-09-08", label: "08.09", kg: 98.7, waist: "—", hips: "—", calves: "—", note: "вт утро; +0.4 vs 31.08; коридор 98–100" },
+      { date: "2026-09-11", label: "11.09", kg: 97.7, waist: "—", hips: "—", calves: "—", note: "пт утро; мин.; −1.0 vs 08.09; старт −3.8" },
+      { date: "2026-09-16", label: "16.09", kg: 97.1, waist: "—", hips: "—", calves: "—", note: "ср утро; новый мин.; −0.6 vs 11.09; старт −4.4" },
+      { date: "2026-09-21", label: "21.09", kg: 97.2, waist: "—", hips: "—", calves: "—", note: "пн утро; +0.1 vs 16.09 после Сб; старт −4.3" },
+    ];
+
+    const trainRows = [
+      { date: "11.08", type: "Вт легко", body: "500 м + круг гири по ~10", mark: "шаги мало" },
+      { date: "12.08", type: "Сила A", body: "бег 2.6 км; жим 2×16 4×8; гипер 4 подх.; отжимания; негативы; dead bug; планка; +2 км", mark: "A ✓, гипер много" },
+      { date: "13.08", type: "Чт легко", body: "600 м + гиря мобилити по 10; сон 1→8", mark: "ок" },
+      { date: "14.08", type: "Сила C+мост", body: "отжимания ~60; подтяг 19; dead bug; мост 3×14; farmer 2×40 м; ~3 км", mark: "C ✓, B долг" },
+      { date: "17.08", type: "Пн A+B утро", body: "бег 3.7 км; мост 2×15+7, 1×5+7; farmer 3×60 м; goblet+швунги 3×15; жим узкий 2×8+1×6; трицепс 3×8; алмазные 2×10+1×8", mark: "объём ↑; без тяги" },
+      { date: "18.08", type: "Вт легко", body: "бег 2 км; круг гири; тяга 2×10+8+6/стор; dead bug 10+2×8; планка 3×30×4", mark: "тяга+кор ✓" },
+      { date: "19.08", type: "Ср отдых", body: "прогулка ~2 км; B перенос на 20.08", mark: "ок" },
+      { date: "20.08", type: "Чт ПК", body: "силовой нет; еда с 15:00", mark: "сбой режима" },
+      { date: "21.08", type: "Сила C+", body: "бег 1.2; подтяг 3×5+2×3; алмазные 4×12; мост 2×15+5, 2×20+5 (3с); farmer 4×~70–100; жук 4×10; взятие 2×12; goblet 15; становая 20", mark: "C ✓; farmer/мост пик" },
+      { date: "22.08", type: "Сб отдых", body: "дела по дому; зарядки/ОФП нет", mark: "ок после Пт" },
+      { date: "23.08", type: "Вс гиря", body: "бег 1.8; взятие 2×16 3×12; жим Кляйна 3×10; goblet+швинги 3×15; жук 3×10; планка 3×30×3", mark: "сила+кор ✓" },
+      { date: "24.08", type: "Сила A", body: "бег 2.4; жим гир 4×10; тяга 4×10; алмаз 4×10; жук 3×10; планка 3×3×30; гипер 3×10 (1с)", mark: "A ✓; вес 98.1" },
+      { date: "25.08", type: "Вт легко", body: "бег 1.2; отжим кулаки 1×20+3×15; подтяг прямой 4×4; Аня МТД 15 мин", mark: "верх ✓" },
+      { date: "26.08", type: "Сила B", body: "бег 2.4; goblet+шв 4×15+5; мост 4×15+5 (3с); RDL 3×20; step 3×20×16; икры 3×20", mark: "B ✓ объём↑" },
+      { date: "27.08", type: "Чт гиря", body: "бег 0.6+1 км; взятие 2×16 5×12; ношение дном вверх 4×10с/руку", mark: "поясница болит" },
+      { date: "28.08", type: "Сила C−", body: "прогулка 1 км; алмаз 3×12+2×10; подтяг 3×5+1×4; вис 3×30с; вело 2,5 км", mark: "C урезанная ✓" },
+      { date: "29.08", type: "Отдых", body: "тренировки нет; Федоров A → 30.08", mark: "перенос" },
+      { date: "30.08", type: "Федоров A?", body: "план: ролик + взятие + тень — факт не дописан", mark: "?" },
+      { date: "31.08", type: "Сила A", body: "вес 98.3; бег 2 км; жим 4×10; тяга 4×10; отжим кулаки 4×20; жук 4×10; планка 4×3×30с; гипер — нет", mark: "A ✓" },
+      { date: "01.09", type: "Вт зал", body: "ходьба много; 2 тренировки ×1,5 ч (ведение); силовой дома нет", mark: "объём ↑" },
+      { date: "02.09", type: "Отдых", body: "тренировки нет; Сила B → перенос", mark: "перенос" },
+      { date: "03.09", type: "Сила B", body: "бег 2 км; goblet 3×15+5; мост 3×20+5 (3с); RDL 3×8×24+8×16; step 3×20; икры; планка; QL R↑ в мосту", mark: "B ✓" },
+      { date: "07.09", type: "Сила A", body: "бег 0.6; жим 4×10; тяга 4×10; алмаз 4×15+кулаки 2×20; жук 4×12; планка 4×3×30; гипер изо 4×40с", mark: "A ✓✓" },
+      { date: "08.09", type: "Вт ходьба", body: "вес 98.7; бег 2 км; еда ~155–175б (+конопл. 2 ст.л.); шаги/верх — ?", mark: "еда✓" },
+      { date: "09.09", type: "Сила B", body: "бег 1.3+ход 1; goblet 3×15+шв+5; RDL 3×10×24+8×16; мост 3×20+10 (3с); step/икры 3×20; side plank 2×30×3; еда ~190–220б / ~2150–2400", mark: "B ✓✓" },
+      { date: "10.09", type: "Чт верх", body: "бег 0.6; подтяг 7+3×5+4=26; отжим кулаки 4×20=80; еда ~130–160б", mark: "верх ✓" },
+      { date: "11.09", type: "C+гиря", body: "вес 97.7; бег 1; круг/восьмёрки; толчок/рывок/махи; Кляйн 3×12; мост 3×20+10; алмаз 3×15; farmer 3×50; жук 3×12; подтяг 3×5; еда ~155–185б", mark: "C ✓+" },
+      { date: "12.09", type: "Сб отдых", body: "утро ок; еда ~165–185б (+сыворотка 2 ложки); кондиция → вс 13", mark: "еда✓" },
+      { date: "13.09", type: "Вс кондиция", body: "прогулка 4 км; гири halo/мах/взятие2/толчок/suitcase 2×40; вз+толчок 8+10; подтяг 3+4+5+4+3=19; тень нет; еда ~155–180б", mark: "✓" },
+      { date: "14.09", type: "Сила A+", body: "жим 4×15; тяга 4×15; отжим 70; жук 3×15; GTG подтяг 7+6+5=18; вечер футбол+бадминтон+бег 0.8 ~1.5ч; еда ~165–190б", mark: "A ✓✓ +" },
+      { date: "15.09", type: "Вт лесенка", body: "подтяг 4+5+6+5+4=24; еда ~150–180б / ~1950–2350 (+сыворотка 2 ложки); шаги — ?", mark: "лесенка ✓" },
+      { date: "17.09", type: "Чт верх", body: "подтяг 24; отжим 3×10; жук; шаги 6000; еда ~155–190б", mark: "верх ✓" },
+      { date: "18.09", type: "Отдых", body: "C→Сб; еда ~145–175б", mark: "отдых" },
+      { date: "19.09", type: "Сила C+", body: "бег 0.8; гири; кулаки 60; farmer 3×80; лесенка 19; вис; гипер; еда верх", mark: "C ✓✓" },
+      { date: "20.09", type: "Вс", body: "еда ~130–160б; тренировка — ?", mark: "еда" },
+      { date: "21.09", type: "Сила A", body: "вес 97.2; жим 1×10+2×15; тяга 1×15+2×20; алмаз 55; жук 3×10; планка; PM нет (с/ч плохо→после заката легче)", mark: "A ✓" },
+      { date: "22.09", type: "Вт лесенка", body: "подтяг 4+5+6+5+4=24; выспался", mark: "лесенка ✓" },
+      { date: "23.09", type: "Сила B", body: "бег 0.6; goblet 3×17+1×20; RDL 4×10×28+10×16; мост 4×20+10; step 4×20×16; side 4×50с", mark: "B ✓✓" },
+      { date: "24.09", type: "Чт верх", body: "подтяг 40; кулаки узко 3×20; еда ~150–185б (сыв.2+Наполеон100)", mark: "верх ✓✓" },
+      { date: "25.09", type: "Сила C", body: "подтяг 28; отжим 100; еда ~155–185б (+сулугуни50)", mark: "C ✓" },
+      { date: "26.09", type: "Сб гири", body: "бег 1.8; farmer 4×100; мост изол.; ДЦ 45; еда ~155–185б (семечки80+сыв.2)", mark: "✓✓" },
+    ];
+
+    const exRows = [
+      { name: "Подтягивания (1 подход)", was: "~6 чистых", now: "лучший сет 7 (10.09); цель 25×1", trend: "↑ к 25" },
+      { name: "Подтяг объём/сессия", was: "19–21", now: "лесенка 24 (22.09); 26 (10.09)", trend: "↑↑" },
+      { name: "Негативы", was: "—", now: "5с×5, 4с×4", trend: "↑" },
+      { name: "Жим гири 2×16", was: "4×8", now: "4×15 (14.09)", trend: "↑↑" },
+      { name: "Мост", was: "4×15+5 (3с) 26.08", now: "3×20+10 (3с) 16.09", trend: "↑" },
+      { name: "RDL", was: "3×20 ×16", now: "3×8×24 + 3×8×16 (16.09)", trend: "↑" },
+      { name: "Step-up", was: "3×20", now: "3×20 ×16 кг (16.09)", trend: "↑↑" },
+      { name: "Farmer", was: "3×60 м", now: "3×50 м (11.09); >100 м бывало", trend: "↑↑" },
+      { name: "Goblet + швунги", was: "4×15+5 (26.08)", now: "3×15+шв+5 возд. 09.09", trend: "→" },
+      { name: "Взятие 2×16", was: "3×12", now: "5×12 (27.08)", trend: "↑↑" },
+      { name: "RDL / step-up", was: "RDL 3×20; step 3×20×16", now: "RDL 3×10×24 +8×16; step 3×20 09.09", trend: "↑ вес/объём" },
+      { name: "Алмазные", was: "3×12+2×10=56", now: "2×15 алмаз+2×20 кулаки=70 (14.09)", trend: "↑↑" },
+      { name: "Отжим кулаки узкие", was: "4×20=80 (31.08)", now: "2×20 в A (14.09); 80 пик 10.09", trend: "↑" },
+      { name: "Жим Кляйна", was: "3×10 (23.08)", now: "3×12 (11.09)", trend: "↑" },
+      { name: "Dead bug", was: "4×10/стор", now: "3×15 (14.09)", trend: "↑" },
+      { name: "Тяга к поясу", was: "4×10", now: "4×15 (14.09)", trend: "↑" },
+      { name: "Римский стул ур.1", was: "—", now: "4×40 с изометрия (07.09)", trend: "старт" },
+    ];
+
+    const foodRows = [
+      { date: "11.08", protein: "~155–180", kcal: "~2100–2400", note: "день закрыт" },
+      { date: "12.08", protein: "~190–200", kcal: "~2170–2310", note: "белок с запасом" },
+      { date: "13.08", protein: "~165–175", kcal: "~2150–2270", note: "орех 100 г" },
+      { date: "14.08", protein: "~165–185", kcal: "~2300–2600", note: "верх коридора ккал" },
+      { date: "15.08", protein: "~120–135", kcal: "~1450–1600", note: "пока мало; добор белка" },
+      { date: "17.08", protein: "~143–158", kcal: "~2320–2720", note: "день закрыт; чечевица на ужин; ккал верх (орехи+масло+творог)" },
+      { date: "18.08", protein: "~163–185", kcal: "~1930–2180", note: "день закрыт; белок ок; ккал низ коридора" },
+      { date: "19.08", protein: "~138–162", kcal: "~1980–2280", note: "день закрыт; +конопляный протеин 3 ст.л.; прогулка 2 км" },
+      { date: "20.08", protein: "~85–105", kcal: "~1450–1750", note: "первый приём 15:00; белок мало; батон 100" },
+      { date: "21.08", protein: "утро ~68–75", kcal: "~880–1000", note: "только завтрак; день не дописан" },
+      { date: "22.08", protein: "~150–175", kcal: "~2150–2550", note: "отдых; 150 г творога не доел" },
+      { date: "23.08", protein: "~157–175", kcal: "~2040–2220", note: "день закрыт; блин+творог 250+какао" },
+      { date: "24.08", protein: "~125–160", kcal: "~1250–1600", note: "ужин не дописан" },
+      { date: "25.08", protein: "~155–185", kcal: "~1950–2400", note: "творог 200дом+500 5%; макароны; 2 яйца; день закрыт*" },
+      { date: "26.08", protein: "~145–175", kcal: "~1850–2300", note: "день закрыт; +творог200+Чудо150+Тема40+хлеб" },
+      { date: "27.08", protein: "~125–155", kcal: "~1600–2000", note: "творог400+чечевица+макароны+3яйца+сливы; поясница" },
+      { date: "28.08", protein: "~132–148", kcal: "~2075–2375", note: "творог+чечевица+макароны+5яиц+запеканка50; орех грец. 50 г" },
+      { date: "29.08", protein: "~155–170", kcal: "~2300–2550", note: "творог400+4яйца+чечевица400+картошка+горошек+сыр70+3блина" },
+      { date: "30.08", protein: "~148–168", kcal: "~2250–2580", note: "творог350+4яйца+макароны+гречка+добор; вечер: конопл. протеин 3 ст.л." },
+      { date: "31.08", protein: "~125–145", kcal: "~1900–2350", note: "творог450+4яйца+фасоль+макароны300+салат+яблоки300; белок чуть ниже" },
+      { date: "01.09", protein: "~145", kcal: "~2350", note: "творог650+4яйца+макароны+салат+запеканка+пирог+сливы; закрыт" },
+      { date: "02.09", protein: "~180", kcal: "~2700", note: "творог300+3яйца+кефир900+картошка400+изолят72+пирог200; ккал верх" },
+      { date: "03.09", protein: "~150–170", kcal: "~2050–2500", note: "творог~600+5яиц+вермишель+картошка+гречка; вечер: конопл. протеин 3 ст.л." },
+      { date: "07.09", protein: "~145–170", kcal: "~2250–2700", note: "творог+4яйца+макароны400+соя размоч.+хлеб+Чудо; вечер: конопл. протеин 3 ст.л." },
+      { date: "08.09", protein: "~155–175", kcal: "~2100–2500", note: "творог дом150+5%250+Агуша200+4яйца+ряженка430+хлеб150+суп горох400+яблоки; вечер: конопл. 2 ст.л." },
+      { date: "09.09", protein: "~190–220", kcal: "~2150–2400", note: "соя100+суп350+орехи50+ябл150+хлеб50+макц/з200+3яйца+творог5%400+сыворотка 3 ложки" },
+      { date: "10.09", protein: "~130–160", kcal: "~1900–2300", note: "творог5%400+соя50+макц/з300+капуста+суп горох350+салат+груши200; без яиц" },
+      { date: "11.09", protein: "~155–185", kcal: "~1850–2200", note: "творог300+Агуша150; гречка300+фасоль бел.100+4яйца; суп красн.фасоль200; капуста туш.300" },
+      { date: "12.09", protein: "~165–185", kcal: "~1800–2050", note: "пицца 4 сыра 200; творог5%400; 3яйца; спаржа200; суп фасоль300; сок Добрый 250; вечер: сыворотка 2 ложки" },
+      { date: "13.09", protein: "~155–180", kcal: "~2100–2500", note: "соя200+творог5%350+суп фасоль100г/350+блины4 с яйцами+хлеб1+груши250+ябл100+салат300+2яйца; белок закрыт" },
+      { date: "14.09", protein: "~165–190", kcal: "~2100–2400", note: "творог дом300+Агуша150+молоко350+хлеб2+йогурт50; гречка300+2яйца; 2яйца+спаржа100; творог5%250+Агуша150; яйца итого 4" },
+      { date: "15.09", protein: "~150–180*", kcal: "~1950–2350*", note: "йогурт350+батон~200; салат600+лён 2ст.л.; творог5%250+дом100+Агуша50+2яйца; сыворотка 2 мерн.ложки — белок ок" },
+      { date: "16.09", protein: "~150–180", kcal: "~1800–2200", note: "творог5%350+Агуша150; 4яйца; суп-каша350; салат500+лён1.5; дыня400; творог100+Агуша100; сыворотка 1л — закрыт" },
+      { date: "17.09", protein: "~155–190", kcal: "~1800–2200", note: "творог5%300+Агуша150; макароны300; 4яйца; салат; арбуз300+дыня200; сыворотка 2л + молоко цел. 350" },
+      { date: "18.09", protein: "~145–175", kcal: "~1750–2150", note: "творог300+Агуша100; 4яйца+макароны260+баклажан+помидор; шоколад25; картошка250; сыворотка2; дыня400" },
+      { date: "19.09", protein: "~155–195", kcal: "~2700–3400", note: "творог350+Агуша; блины; чечевица570; пицца 2 куска; Наполеон150; фри50; моцарелла50 — ккал верх (праздник)" },
+      { date: "20.09", protein: "~130–160", kcal: "~1800–2200", note: "творог5%300+Агуша100; 2яйца+фасоль300+шампиньоны200+сухари50; чечевица300; цикорий на молоке350; яблоки200" },
+      { date: "21.09", protein: "~170–210", kcal: "~2100–2550", note: "творог+Агуша; салат+фасоль150+грибы+сухари; яблоки150; яйца итого5; гречка200+мак.ц/з120; сыв.2+молоко350; орехи23" },
+      { date: "22.09", protein: "~150–170", kcal: "~2000–2400", note: "творог300+Агуша100+хлеб50; фасоль300+шамп150+сухари50; картошка400+молоко350+ябл200; сыв.2 на воде" },
+      { date: "23.09", protein: "~140–180", kcal: "~2050–2450", note: "творог+хлеб; спаржа+хлеб; мак.300+2яйца; ябл200; 2яйца+Активиа100; картошка100+яйцо+блин; молоко350+сыв.1" },
+      { date: "24.09", protein: "~150–185", kcal: "~2100–2500", note: "батон+компот; творог+Агуша; мак.300+спаржа200; суп400+2яйца; сыв.2; Активиа100; Наполеон100" },
+      { date: "25.09", protein: "~155–185", kcal: "~2000–2350", note: "творог450+Агуша; суп400; 4яйца; гречка; соя70; орехи25; мак.150; гренки50; сулугуни50" },
+      { date: "26.09", protein: "~155–185", kcal: "~2200–2600", note: "творог+Тёма; мак.250+спаржа; 3яйца; картошка400; гречка; гренки30; семечки80; сыв.2; блин+творог" },
+    ];
+
+    const pullMaxSet = [
+      { label: "11.08", n: 6 },
+      { label: "21.08", n: 5 },
+      { label: "25.08", n: 4 },
+      { label: "28.08", n: 5 },
+      { label: "10.09", n: 7 },
+      { label: "11.09", n: 5 },
+      { label: "13.09", n: 5 },
+      { label: "14.09 GTG", n: 7 },
+      { label: "15.09", n: 6 },
+      { label: "17.09", n: 6 },
+      { label: "19.09", n: 5 },
+      { label: "22.09", n: 6 },
+      { label: "24.09", n: 5 },
+      { label: "25.09", n: 5 },
+    ];
+
+    const pullSession = [
+      { label: "11.08 макс", n: 6 },
+      { label: "12.08 негативы*", n: 18 },
+      { label: "14.08 хваты", n: 19 },
+      { label: "21.08", n: 21 },
+      { label: "25.08 лёгк", n: 16 },
+      { label: "28.08", n: 19 },
+      { label: "10.09", n: 26 },
+      { label: "11.09", n: 15 },
+      { label: "13.09 лес.", n: 19 },
+      { label: "14.09 GTG", n: 18 },
+      { label: "15.09 лес.", n: 24 },
+      { label: "17.09", n: 24 },
+      { label: "19.09 лес.", n: 19 },
+      { label: "22.09 лес.", n: 24 },
+      { label: "24.09", n: 40 },
+      { label: "25.09", n: 28 },
+    ];
+    // *негативы ≈ сумма повторов опусканий (оценка для графика)
+
+    const pushSession = [
+      { label: "14.08 смеш.", n: 60 },
+      { label: "21.08 алмаз", n: 48 },
+      { label: "24.08 алмаз", n: 40 },
+      { label: "25.08 кулаки", n: 65 },
+      { label: "28.08 алмаз", n: 56 },
+      { label: "31.08 кулаки", n: 80 },
+      { label: "07.09 А+к", n: 100 },
+      { label: "10.09 кулаки", n: 80 },
+      { label: "11.09 алмаз", n: 45 },
+      { label: "14.09 А+к", n: 70 },
+      { label: "19.09 кулаки", n: 60 },
+      { label: "21.09 алмаз", n: 55 },
+      { label: "24.09 кулаки узко", n: 60 },
+      { label: "25.09", n: 100 },
+    ];
+
+    // Сумма рабочих повторов за сессию (оценка)
+    const liftSessions = {
+      labels: ["12.08", "21.08", "24.08", "26.08", "27.08", "31.08", "03.09", "07.09", "09.09", "11.09", "14.09"],
+      press:  [32, null, 40, null, null, 40, null, 40, null, null, 60],
+      bridge: [null, 70, null, 65, null, null, 65, null, 70, 70, null],
+      clean:  [null, 24, null, null, 60, null, null, null, null, null, null],
+      row:    [null, null, 40, null, null, 40, null, 40, null, null, 60],
+    };
+    // ========== /DATA ==========
+
+    function chronoKey(label) {
+      const s = String(label);
+      const iso = s.match(/(\d{4})-(\d{2})-(\d{2})/);
+      if (iso) return Number(iso[1]) * 10000 + Number(iso[2]) * 100 + Number(iso[3]);
+      const dm = s.match(/(\d{1,2})\.(\d{1,2})/);
+      if (dm) return Number(dm[2]) * 100 + Number(dm[1]);
+      return 0;
+    }
+    function byChrono(rows, getLabel) {
+      const g = getLabel || (r => r.label || r.date);
+      return [...rows].sort((a, b) => chronoKey(g(a)) - chronoKey(g(b)));
+    }
+
+    function midRange(s) {
+      if (s == null) return null;
+      const t = String(s).replace(/~/g, "").replace(/утро\s*/i, "");
+      const m = t.match(/(\d+(?:\.\d+)?)\s*[–\-]\s*(\d+(?:\.\d+)?)/);
+      if (m) return (Number(m[1]) + Number(m[2])) / 2;
+      const one = t.match(/(\d+(?:\.\d+)?)/);
+      return one ? Number(one[1]) : null;
+    }
+
+    const foodChartRows = byChrono(foodRows, r => r.date)
+      .map(r => ({
+        date: r.date,
+        protein: midRange(r.protein),
+        kcal: midRange(r.kcal),
+        note: r.note,
+      }))
+      .filter(r => r.kcal != null && r.kcal >= 1500 && r.protein != null);
+
+    const weightChrono = byChrono(weightRows);
+    const pullMaxChrono = byChrono(pullMaxSet);
+    const pullChrono = byChrono(pullSession);
+    const pushChrono = byChrono(pushSession);
+
+    function fillTable(id, rows, cols) {
+      const tb = document.getElementById(id);
+      tb.innerHTML = rows.map(r => "<tr>" + cols.map(c => "<td>" + c(r) + "</td>").join("") + "</tr>").join("");
+    }
+
+    fillTable("weightTable", weightRows, [
+      r => r.label, r => r.kg, r => r.waist, r => r.hips, r => r.calves, r => r.note
+    ]);
+    fillTable("trainTable", trainRows, [
+      r => r.date, r => r.type, r => r.body,
+      r => r.mark.includes("долг") ? '<span class="debt">' + r.mark + "</span>" : '<span class="ok">' + r.mark + "</span>"
+    ]);
+    fillTable("exTable", exRows, [r => r.name, r => r.was, r => r.now, r => r.trend]);
+    fillTable("foodTable", foodRows, [r => r.date, r => r.protein, r => r.kcal, r => r.note]);
+
+    const chartDefaults = {
+      responsive: true,
+      maintainAspectRatio: false,
+    };
+
+    new Chart(document.getElementById("weightChart"), {
+      type: "line",
+      data: {
+        labels: weightChrono.map(r => r.label),
+        datasets: [{
+          label: "Вес, кг",
+          data: weightChrono.map(r => r.kg),
+          borderColor: "#2f5d50",
+          backgroundColor: "rgba(47,93,80,0.12)",
+          fill: true,
+          tension: 0.25,
+          pointRadius: 5,
+          pointBackgroundColor: "#2f5d50",
+        }]
+      },
+      options: {
+        ...chartDefaults,
+        scales: {
+          x: { reverse: false },
+          y: { suggestedMin: 80, suggestedMax: 103, title: { display: true, text: "кг" } }
+        },
+        plugins: { legend: { display: false } }
+      }
+    });
+
+    new Chart(document.getElementById("pullChart"), {
+      type: "line",
+      data: {
+        labels: pullMaxChrono.map(r => r.label),
+        datasets: [
+          {
+            label: "Макс. 1 подход",
+            data: pullMaxChrono.map(r => r.n),
+            borderColor: "#2f5d50",
+            backgroundColor: "rgba(47,93,80,0.12)",
+            fill: true,
+            tension: 0.25,
+            pointRadius: 5,
+            pointBackgroundColor: "#2f5d50",
+          },
+          {
+            label: "Цель 25×1",
+            data: pullMaxChrono.map(() => 25),
+            borderColor: "#8b4513",
+            borderDash: [6, 4],
+            pointRadius: 0,
+            fill: false,
+          },
+        ]
+      },
+      options: {
+        ...chartDefaults,
+        scales: {
+          x: { reverse: false },
+          y: { beginAtZero: true, suggestedMax: 28, title: { display: true, text: "повт. / 1 подход" } }
+        },
+        plugins: { legend: { position: "bottom", labels: { boxWidth: 12, font: { size: 10 } } } }
+      }
+    });
+
+    new Chart(document.getElementById("pullVolChart"), {
+      type: "bar",
+      data: {
+        labels: pullChrono.map(r => r.label),
+        datasets: [{
+          label: "Подтяг / сессия",
+          data: pullChrono.map(r => r.n),
+          backgroundColor: "#2f5d50",
+        }]
+      },
+      options: {
+        ...chartDefaults,
+        scales: {
+          x: { reverse: false },
+          y: { beginAtZero: true, title: { display: true, text: "повт. / сессия" } }
+        },
+        plugins: { legend: { display: false } }
+      }
+    });
+
+    new Chart(document.getElementById("pushChart"), {
+      type: "bar",
+      data: {
+        labels: pushChrono.map(r => r.label),
+        datasets: [{
+          label: "Отжимания / сессия",
+          data: pushChrono.map(r => r.n),
+          backgroundColor: "#8b7355",
+        }]
+      },
+      options: {
+        ...chartDefaults,
+        scales: {
+          x: { reverse: false },
+          y: { beginAtZero: true, title: { display: true, text: "повт." } }
+        },
+        plugins: { legend: { display: false } }
+      }
+    });
+
+    new Chart(document.getElementById("liftsChart"), {
+      type: "line",
+      data: {
+        labels: liftSessions.labels,
+        datasets: [
+          {
+            label: "Жим 2×16 (сумма повт.)",
+            data: liftSessions.press,
+            borderColor: "#2f5d50",
+            backgroundColor: "#2f5d50",
+            tension: 0.2,
+            spanGaps: true,
+            pointRadius: 5,
+          },
+          {
+            label: "Тяга (сумма повт.)",
+            data: liftSessions.row,
+            borderColor: "#4a6fa5",
+            backgroundColor: "#4a6fa5",
+            tension: 0.2,
+            spanGaps: true,
+            pointRadius: 5,
+          },
+          {
+            label: "Мост (рабочие повт.)",
+            data: liftSessions.bridge,
+            borderColor: "#8b7355",
+            backgroundColor: "#8b7355",
+            tension: 0.2,
+            spanGaps: true,
+            pointRadius: 5,
+          },
+          {
+            label: "Взятие (сумма повт.)",
+            data: liftSessions.clean,
+            borderColor: "#8b4513",
+            backgroundColor: "#8b4513",
+            tension: 0.2,
+            spanGaps: true,
+            pointRadius: 5,
+          },
+        ]
+      },
+      options: {
+        ...chartDefaults,
+        scales: {
+          x: { reverse: false },
+          y: { beginAtZero: true, title: { display: true, text: "повт. / сессия" } }
+        },
+        plugins: { legend: { position: "bottom" } }
+      }
+    });
+
+    const foodLabels = foodChartRows.map(r => r.date);
+    const nFood = foodLabels.length;
+
+    new Chart(document.getElementById("kcalChart"), {
+      type: "bar",
+      data: {
+        labels: foodLabels,
+        datasets: [
+          {
+            label: "Ккал (оценка)",
+            data: foodChartRows.map(r => r.kcal),
+            backgroundColor: foodChartRows.map(r => r.kcal > 2200 ? "#8b4513" : "#2f5d50"),
+            order: 2,
+          },
+          {
+            label: "Цель низ 1900",
+            data: Array(nFood).fill(1900),
+            type: "line",
+            borderColor: "#5c6560",
+            borderDash: [6, 4],
+            pointRadius: 0,
+            fill: false,
+            order: 1,
+          },
+          {
+            label: "Цель верх 2200",
+            data: Array(nFood).fill(2200),
+            type: "line",
+            borderColor: "#8b4513",
+            borderDash: [6, 4],
+            pointRadius: 0,
+            fill: false,
+            order: 0,
+          },
+        ]
+      },
+      options: {
+        ...chartDefaults,
+        scales: {
+          x: { reverse: false },
+          y: { suggestedMin: 1400, suggestedMax: 2900, title: { display: true, text: "ккал" } }
+        },
+        plugins: { legend: { position: "bottom", labels: { boxWidth: 12, font: { size: 10 } } } }
+      }
+    });
+
+    new Chart(document.getElementById("proteinChart"), {
+      type: "line",
+      data: {
+        labels: foodLabels,
+        datasets: [
+          {
+            label: "Белок, г",
+            data: foodChartRows.map(r => r.protein),
+            borderColor: "#4a6fa5",
+            backgroundColor: "rgba(74,111,165,0.15)",
+            fill: true,
+            tension: 0.25,
+            pointRadius: 4,
+            pointBackgroundColor: "#4a6fa5",
+          },
+          {
+            label: "Цель 160",
+            data: Array(nFood).fill(160),
+            borderColor: "#2f5d50",
+            borderDash: [6, 4],
+            pointRadius: 0,
+            fill: false,
+          },
+          {
+            label: "Цель 180",
+            data: Array(nFood).fill(180),
+            borderColor: "#5c6560",
+            borderDash: [4, 4],
+            pointRadius: 0,
+            fill: false,
+          },
+        ]
+      },
+      options: {
+        ...chartDefaults,
+        scales: {
+          x: { reverse: false },
+          y: { suggestedMin: 80, suggestedMax: 220, title: { display: true, text: "г белка" } }
+        },
+        plugins: { legend: { position: "bottom", labels: { boxWidth: 12, font: { size: 10 } } } }
+      }
+    });
+  </script>
+</body>
+</html>

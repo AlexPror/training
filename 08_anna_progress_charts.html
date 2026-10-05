@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Анна — кондиции, здоровье, сила</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg: #eef2f0;
+      --ink: #1c2422;
+      --muted: #5a6a66;
+      --card: #fafbfa;
+      --line: #c5d0cc;
+      --accent: #3d6b63;
+      --soft: #6b8f88;
+      --warn: #9a5b3c;
+      --ok: #2f6b4f;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background:
+        radial-gradient(ellipse at 0% 0%, #d9e8e4 0%, transparent 42%),
+        radial-gradient(ellipse at 100% 5%, #e4ebe6 0%, transparent 38%),
+        var(--bg);
+      color: var(--ink);
+      line-height: 1.45;
+      padding: 1.25rem;
+    }
+    h1 { font-size: 1.5rem; margin: 0 0 0.25rem; letter-spacing: -0.02em; }
+    .sub { color: var(--muted); margin-bottom: 1.25rem; font-size: 0.95rem; }
+    section {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 1rem 1.1rem 1.2rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 1px 0 rgba(0,0,0,0.03);
+    }
+    h2 { font-size: 1.05rem; margin: 0 0 0.75rem; color: var(--accent); }
+    .chart-wrap { position: relative; height: 260px; max-width: 720px; }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    @media (max-width: 720px) {
+      .grid-2 { grid-template-columns: 1fr; }
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+    th, td {
+      text-align: left;
+      padding: 0.45rem 0.5rem;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+    }
+    th {
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    tr:last-child td { border-bottom: none; }
+    .ok { color: var(--ok); font-weight: 600; }
+    .warn { color: var(--warn); font-weight: 600; }
+    .note { font-size: 0.85rem; color: var(--muted); margin-top: 0.75rem; }
+    .pill {
+      display: inline-block;
+      padding: 0.15rem 0.5rem;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      background: #e3eeeb;
+      color: var(--accent);
+      margin-right: 0.35rem;
+    }
+    code { font-size: 0.85em; }
+    @media (max-width: 640px) {
+      body { padding: 0.75rem; }
+      .chart-wrap { height: 220px; }
+      table { font-size: 0.8rem; }
+    }
+  </style>
+</head>
+<body>
+  <p style="margin:0 0 0.75rem;font-size:0.9rem"><a href="index.html" style="color:#6b3fa0">← Главная</a> · <a href="04_my_progress_charts.html" style="color:#6b3fa0">Александр</a> · <a href="10_bju_reference.html" style="color:#6b3fa0">БЖУ</a></p>
+  <h1>Анна — прогресс</h1>
+  <p class="sub">
+    31 год · 173 см · ~60 кг · мать троих · план МТД + силовые дома<br />
+    Фокус: <span class="pill">здоровье</span><span class="pill">кондиции</span><span class="pill">сила</span>
+    · без учёта питания · обновлено 27.08.2026<br />
+    Источник: <code>07_anna_pelvic_floor_program.txt</code> · <code>06_anna_home_training.txt</code>
+  </p>
+
+  <section>
+    <h2>Маркеры здоровья (не «вес ради веса»)</h2>
+    <table>
+      <thead>
+        <tr><th>Маркер</th><th>Старт / заметка</th><th>Сейчас</th><th>Цель</th></tr>
+      </thead>
+      <tbody id="healthTable"></tbody>
+    </table>
+    <p class="note">Оценивать раз в 1–2 недели. Не замена врачу. Dead bug — пауза (хруст ТБС).</p>
+  </section>
+
+  <div class="grid-2">
+    <section>
+      <h2>Пробежки, км</h2>
+      <div class="chart-wrap"><canvas id="runChart"></canvas></div>
+      <p class="note">Короткие, без ветра/холода. Не гонка за дистанцией.</p>
+    </section>
+    <section>
+      <h2>Сила: рабочие веса (кг)</h2>
+      <div class="chart-wrap"><canvas id="liftChart"></canvas></div>
+      <p class="note">Goblet / мост / RDL — последние известные рабочие веса.</p>
+    </section>
+  </div>
+
+  <section>
+    <h2>Журнал тренировок</h2>
+    <table>
+      <thead>
+        <tr><th>Дата</th><th>Тип</th><th>Содержание</th><th>Оценка</th></tr>
+      </thead>
+      <tbody id="trainTable"></tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Силовые показатели</h2>
+    <table>
+      <thead>
+        <tr><th>Упражнение</th><th>Было</th><th>Сейчас / пик</th><th>Тренд</th></tr>
+      </thead>
+      <tbody id="exTable"></tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Кондиции (неделя)</h2>
+    <table>
+      <thead>
+        <tr><th>Неделя</th><th>МТД / кор</th><th>Сила</th><th>Бег / ходьба</th><th>Заметка</th></tr>
+      </thead>
+      <tbody id="condTable"></tbody>
+    </table>
+    <p class="note">Цель недели: 2× МТД + 1–2 силовые + дыхание ежедневно 3 мин. Не копировать программу Саши.</p>
+  </section>
+
+  <script>
+    // ========== DATA: дописывай сюда при новых тренировках ==========
+    const healthRows = [
+      { name: "SUI (кашель / чих)", start: "есть, стрессовое", now: "наблюдаем", goal: "реже / слабее" },
+      { name: "«Домик» на животе", start: "возможен после 3 родов", now: "следить в видео", goal: "нет при нагрузке" },
+      { name: "Хруст ТБС", start: "dead bug — стоп", now: "пауза dead bug", goal: "к врачу → план" },
+      { name: "Лёгкие / кашель на холоде", start: "слабые, ветер — кашель", now: "бег короткий / дом", goal: "без провокации" },
+      { name: "Корсет на выдохе (МТД)", start: "учимся", now: "видео + дыхание", goal: "стабильно чувствует" },
+    ];
+
+    const runRows = [
+      { date: "24.08", km: 0.6 },
+      { date: "25.08", km: 1.2 },
+      { date: "26.08", km: 1.2 },
+      { date: "27.08", km: 0.6 },
+      { date: "28.08", km: 1.0 },
+      { date: "07.09", km: 0.6 },
+      { date: "09.09", km: 2.3 },
+      { date: "15.09", km: 1.5 },
+      { date: "16.09", km: 0.8 },
+      { date: "19.09", km: 0.8 },
+      { date: "23.09", km: 1.2 },
+      { date: "26.09", km: 0.6 },
+    ];
+
+    const liftSnapshot = [
+      { name: "Goblet", kg: 8 },
+      { name: "Мост", kg: 8 },
+      { name: "RDL", kg: 12 },
+      { name: "Наклоны", kg: 12 },
+      { name: "Step-up", kg: 8 },
+      { name: "Жим лёжа", kg: 8 },
+    ];
+
+    const trainRows = [
+      {
+        date: "24.08",
+        type: "МТД + верх",
+        body: "бег 0.6 км; жим гири 12 кг двумя руками лёжа; гипер 3×10; видео диастаз y_KjBM2lcZQ",
+        mark: "старт ✓; dead bug пропуск",
+      },
+      {
+        date: "25.08",
+        type: "МТД",
+        body: "бег 1.2 км с Сашей; 15 мин из ролика (МТД/кор)",
+        mark: "Вт по плану ✓",
+      },
+      {
+        date: "26.08",
+        type: "Сила B",
+        body: "бег 1.2; goblet 3×10×5 кг; мост 3×10×5 кг (3с); RDL 3×10×12; наклоны 3×10×12; step 3×20×5; икры 3×20 (3с)",
+        mark: "сила ✓; наклоны следить SUI",
+      },
+      {
+        date: "27.08",
+        type: "Лёгкий верх",
+        body: "бег 0.6 + прогулка 1 км; трицепс лёжа 3×8×3 кг; ношение гири на попа 3×10 с",
+        mark: "лёгкий ✓",
+      },
+      {
+        date: "28.08",
+        type: "Лёгкий Пт",
+        body: "прогулка 1 км; отжим с колен 3×10; подтяг на стенке (ноги согнуты) 3×10; бок. планка с колен 3×30 с",
+        mark: "лёгкий ✓",
+      },
+      {
+        date: "07.09",
+        type: "Силовой верх+",
+        body: "бег 0.6; жим 8×3×10; трицепс 8×3×8; тяга к подбородку 8×3×20; ножницы 3+3×10; вело 30; гипер изо 3×60 с",
+        mark: "объём↑; гипер/SUI следить",
+      },
+      {
+        date: "09.09",
+        type: "Сила B",
+        body: "бег 1.3+ход 1; мост 8×3×10 (1с); goblet 8×3×10; RDL 8×3×10; наклоны 12×2×10; step/икры 3×20",
+        mark: "B ✓; мост/goblet 5→8 кг",
+      },
+      {
+        date: "14.09",
+        type: "Силовой верх",
+        body: "прогулка 1.3; жим 8×2×10+12×1×8; трицепс 3×10; ножницы 3×10; отжим с колен 4×10; тяга к подбородку 8×3×10",
+        mark: "верх ✓; жим 12 кг",
+      },
+      {
+        date: "15.09",
+        type: "Бег",
+        body: "бег 1.5 км",
+        mark: "✓",
+      },
+      {
+        date: "16.09",
+        type: "Сила B",
+        body: "бег 0.8; мост/goblet/RDL 8×3×10; наклоны 12×3×10/стор; step 3×20×8; икры 3×20",
+        mark: "B ✓; step+наклоны ↑",
+      },
+      {
+        date: "19.09",
+        type: "Сб гири+Таня",
+        body: "бег 0.8; гиря вокруг пояса 20/стор + восьмёрка 20; с Таней 2×15 мин",
+        mark: "✓",
+      },
+      {
+        date: "21.09",
+        type: "Таня",
+        body: "с Таней 15 мин",
+        mark: "✓",
+      },
+      {
+        date: "23.09",
+        type: "Сила B",
+        body: "бег 1.2; мост/goblet 8×3×10; RDL 12×3×12; наклоны 12×3×12; step 3×20×8; икры 3×20",
+        mark: "B ✓✓; RDL↑ бег↑",
+      },
+      {
+        date: "26.09",
+        type: "Сб верх",
+        body: "бег 0.6; трицепс лёжа 8×3×8; жим гири 8×3×10",
+        mark: "✓",
+      },
+    ];
+
+    const exRows = [
+      { name: "Goblet squat", was: "3×10 × 5 кг", now: "3×10 × 8 кг (09.09)", trend: "↑↑" },
+      { name: "Мост с гирей", was: "3×10 × 5 кг", now: "3×10 × 8 кг, пауза 1 с (09.09)", trend: "↑↑" },
+      { name: "RDL / румынка", was: "3×10 × 8 кг (09.09)", now: "3×12 × 12 кг (23.09)", trend: "↑↑ вес+объём" },
+      { name: "Боковые наклоны", was: "3×10 × 12 кг (16.09)", now: "3×12 × 12 кг (23.09)", trend: "объём↑; SUI" },
+      { name: "Step-up", was: "3×20 × 5 кг", now: "3×20 × 8 кг (23.09)", trend: "↑" },
+      { name: "Трицепс", was: "3×8 × 3 кг", now: "3×8 × 8 кг лёжа (26.09)", trend: "↑↑" },
+      { name: "Жим гири лёжа", was: "12 кг разово", now: "8 кг 3×10 (26.09)", trend: "рабочий" },
+      { name: "Гиперэкстензия", was: "3×10 (24.08)", now: "изометрия 3×60 с (07.09)", trend: "↑↑ осторожно" },
+      { name: "Dead bug", was: "в плане", now: "ПАУЗА (хруст ТБС)", trend: "стоп" },
+      { name: "Пробежка", was: "1.2 км", now: "0.6 (26.09); 1.2 (23.09); пик 2.3", trend: "↑" },
+    ];
+
+    const condRows = [
+      {
+        week: "08–14.09",
+        mtd: "дописать Вт/Чт",
+        strength: "Ср 09 B (мост/goblet 8 кг)",
+        walk: "бег 1.3 + ходьба 1",
+        note: "вес на мосте/goblet ↑; RDL 8 кг; наклоны 2×10",
+      },
+      {
+        week: "01–07.09",
+        mtd: "перерыв / дописать",
+        strength: "Пн 07 верх+гипер изо+вело",
+        walk: "бег 0.6 + вело 30 мин",
+        note: "трицепс 8 кг; гипер 3×60 с — следить SUI",
+      },
+      {
+        week: "24–30.08",
+        mtd: "Пн видео диастаз; Вт 15 мин ролик",
+        strength: "Пн жим+гипер; Ср B полная",
+        walk: "0.6 + 1.2 + 1.2 + 1 км",
+        note: "Пт: верх+кор без ног; петли ещё нет",
+      },
+    ];
+    // ========== /DATA ==========
+
+    function fillTable(id, rows, cols) {
+      const tb = document.getElementById(id);
+      tb.innerHTML = rows.map(r => "<tr>" + cols.map(c => "<td>" + c(r) + "</td>").join("") + "</tr>").join("");
+    }
+
+    fillTable("healthTable", healthRows, [
+      r => r.name, r => r.start, r => r.now, r => r.goal
+    ]);
+    fillTable("trainTable", trainRows, [
+      r => r.date, r => r.type, r => r.body,
+      r => r.mark.includes("стоп") || r.mark.includes("осторожно")
+        ? '<span class="warn">' + r.mark + "</span>"
+        : '<span class="ok">' + r.mark + "</span>"
+    ]);
+    fillTable("exTable", exRows, [
+      r => r.name, r => r.was, r => r.now,
+      r => r.trend === "стоп" ? '<span class="warn">' + r.trend + "</span>" : r.trend
+    ]);
+    fillTable("condTable", condRows, [
+      r => r.week, r => r.mtd, r => r.strength, r => r.walk, r => r.note
+    ]);
+
+    function chronoKey(label) {
+      const s = String(label);
+      const dm = s.match(/(\d{1,2})\.(\d{1,2})/);
+      if (dm) return Number(dm[2]) * 100 + Number(dm[1]);
+      return 0;
+    }
+    const runChrono = [...runRows].sort((a, b) => chronoKey(a.date) - chronoKey(b.date));
+
+    new Chart(document.getElementById("runChart"), {
+      type: "bar",
+      data: {
+        labels: runChrono.map(r => r.date),
+        datasets: [{
+          label: "км",
+          data: runChrono.map(r => r.km),
+          backgroundColor: "#3d6b63",
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: { reverse: false },
+          y: { beginAtZero: true, suggestedMax: 2, title: { display: true, text: "км" } }
+        },
+        plugins: { legend: { display: false } }
+      }
+    });
+
+    new Chart(document.getElementById("liftChart"), {
+      type: "bar",
+      data: {
+        labels: liftSnapshot.map(r => r.name),
+        datasets: [{
+          label: "кг",
+          data: liftSnapshot.map(r => r.kg),
+          backgroundColor: ["#3d6b63", "#6b8f88", "#4a7a72", "#4a7a72", "#6b8f88", "#8a9e98"],
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: { beginAtZero: true, suggestedMax: 16, title: { display: true, text: "кг" } }
+        },
+        plugins: { legend: { display: false } }
+      }
+    });
+  </script>
+</body>
+</html>
