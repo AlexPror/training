@@ -9,7 +9,7 @@ function midRange(s) {
 
 export const meta = {
   name: 'Александр',
-  updated: '05.10.2026',
+  updated: '06.10.2026',
   height: 180,
   startKg: 101.5,
   targetProtein: [160, 180],
@@ -123,6 +123,17 @@ export const foodDays = [
     items: [
       { id: 'blini', grams: 2, meal: 'Ночь' },
       { id: 'bun_seed', grams: 75, meal: 'Ночь' },
+    ],
+  },
+  {
+    date: '2026-10-06',
+    note: 'День ещё открыт: пока завтрак + подтягивания. Еду дописать.',
+    menu: [
+      { meal: 'Завтрак', dishes: 'Творог 5% 350 г, молоко домашнее 100 г' },
+    ],
+    items: [
+      { id: 'tvorog5', grams: 350, meal: 'Завтрак' },
+      { id: 'milk_home', grams: 100, meal: 'Завтрак' },
     ],
   },
 ]
@@ -255,6 +266,14 @@ export const trainRows = [
     kind: 'rest',
     min: 0,
   },
+  {
+    date: '06.10',
+    type: 'Вт верх',
+    body: 'подтяг 10+8+6+7+6=37 (НОВЫЙ ПИК 1×10!); завтрак: творог5 350 + молоко дом. 100; еда дня — дописать',
+    mark: 'пик 10↑↑',
+    kind: 'easy',
+    min: 25,
+  },
 ]
 
 export const foodRows = [
@@ -302,6 +321,7 @@ export const foodRows = [
   { date: '03.10', protein: '~125–155', kcal: '~1900–2300' },
   { date: '04.10', protein: '~155–185', kcal: '~1900–2200' },
   { date: '05.10', protein: '~15–25', kcal: '~450–550' },
+  { date: '06.10', protein: '~60–70', kcal: '~480–520' },
 ].map((r) => ({
   ...r,
   proteinMid: midRange(r.protein),
@@ -317,9 +337,9 @@ export const exercises = [
     goal: 25,
     goalLabel: 'цель: 25 в одном подходе',
     targetMax: 25,
-    current: 7,
-    currentLabel: 'сет **7** (02.10 = пик 10.09); цель 25×1',
-    trend: '↑↑ пик сета повторён',
+    current: 10,
+    currentLabel: 'сет **10** (06.10) — новый пик; было 7',
+    trend: '↑↑↑ НОВЫЙ МАКС',
     color: '#0a7a5c',
     points: [
       { label: '11.08', v: 6, note: 'макс чистых ~6' },
@@ -340,6 +360,7 @@ export const exercises = [
       { label: '29.09', v: 5, note: '3×5' },
       { label: '01.10', v: 6, note: 'лесенка 4+5+6+5+4' },
       { label: '02.10', v: 7, note: '6+7+6+5+4' },
+      { label: '06.10', v: 10, dose: '10+8+6+7+6', note: 'НОВЫЙ ПИК 10' },
     ],
   },
   {
@@ -347,9 +368,9 @@ export const exercises = [
     name: 'Подтяг · объём сессии',
     unit: 'повт./сессия',
     goal: null,
-    current: 28,
-    currentLabel: '6+7+6+5+4=28 (02.10); пик 40 (24.09)',
-    trend: 'C ✓✓',
+    current: 37,
+    currentLabel: '10+8+6+7+6=37 (06.10); пик сессии 40 (24.09)',
+    trend: '↑↑ объём',
     color: '#3d8a6a',
     points: [
       { label: '11.08', v: 6 },
@@ -372,6 +393,7 @@ export const exercises = [
       { label: '29.09', v: 15 },
       { label: '01.10', v: 24 },
       { label: '02.10', v: 28 },
+      { label: '06.10', v: 37, dose: '10+8+6+7+6' },
     ],
   },
   {

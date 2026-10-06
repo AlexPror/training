@@ -5,6 +5,7 @@ export const FOODS = [
   { id: 'ryazhenka', name: 'Ряженка ~4%', cat: 'Молочка', kcal: 67, p: 3.0, f: 4.0, c: 4.2 },
   { id: 'kefir32', name: 'Кефир 3,2%', cat: 'Молочка', kcal: 56, p: 2.9, f: 3.2, c: 4.0 },
   { id: 'milk25', name: 'Молоко 2,5%', cat: 'Молочка', kcal: 52, p: 2.8, f: 2.5, c: 4.7 },
+  { id: 'milk_home', name: 'Молоко домашнее (~3,5%)', cat: 'Молочка', kcal: 64, p: 3.2, f: 3.5, c: 4.7 },
   { id: 'activia', name: 'Активиа йогурт ~1,5%', cat: 'Молочка', kcal: 75, p: 4.5, f: 1.5, c: 10 },
   { id: 'yogurt_chudo', name: 'Йогурт Чудо 1,8%', cat: 'Молочка', kcal: 72, p: 3.5, f: 1.8, c: 9.5 },
   { id: 'zapekanka', name: 'Запеканка творожная', cat: 'Молочка', kcal: 170, p: 14.0, f: 8.0, c: 12 },
