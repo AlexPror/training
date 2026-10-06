@@ -42,6 +42,8 @@ export const FOODS = [
   { id: 'walnut', name: 'Грецкий орех', cat: 'Жиры', kcal: 654, p: 15.2, f: 65.2, c: 13.7 },
   { id: 'pasta', name: 'Макароны варёные (высший сорт)', cat: 'Крупы', kcal: 112, p: 3.5, f: 0.4, c: 23 },
   { id: 'broccoli', name: 'Брокколи', cat: 'Овощи/фрукты', kcal: 34, p: 2.8, f: 0.4, c: 7 },
+  { id: 'peas', name: 'Горошек зелёный', cat: 'Овощи/фрукты', kcal: 69, p: 5.0, f: 0.4, c: 12 },
+  { id: 'kissel', name: 'Кисель', cat: 'Овощи/фрукты', kcal: 55, p: 0.2, f: 0, c: 13 },
   { id: 'suluguni', name: 'Сулугуни', cat: 'Молочка', kcal: 290, p: 20.0, f: 24.0, c: 0 },
   { id: 'sausage_plant', name: 'Колбаса растительная', cat: 'Бобовые', kcal: 200, p: 15.0, f: 12.0, c: 8 },
   { id: 'cookie_oat', name: 'Печенье овсяное/шоколадное', cat: 'Крупы', kcal: 450, p: 7.0, f: 18.0, c: 65 },
