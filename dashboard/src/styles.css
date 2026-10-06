@@ -1446,3 +1446,118 @@ footer.site {
     max-width: none;
   }
 }
+
+/* —— Кабинет как у детей (без PIN) —— */
+.shell.family,
+.shell.no-global-nav {
+  padding-bottom: 5.5rem;
+  max-width: 720px;
+}
+.shell.family .athlete-top {
+  margin-bottom: 1.1rem;
+}
+.athlete-name {
+  font-weight: 700;
+  color: var(--accent-ink);
+  font-size: 0.9rem;
+}
+.quick-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin: 0 0 1rem;
+}
+.quick-tab {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.45rem 0.75rem;
+  border-radius: 999px;
+  background: var(--glass-strong);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+.quick-tab:hover {
+  background: var(--accent-soft);
+  text-decoration: none;
+}
+
+.tabbar {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 0;
+  width: min(720px, 100%);
+  z-index: 30;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.15rem;
+  padding: 0.4rem 0.45rem calc(0.4rem + env(safe-area-inset-bottom));
+  background: var(--glass-strong);
+  border: 1px solid var(--line);
+  border-bottom: none;
+  border-radius: 22px 22px 0 0;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+.tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.4rem 0.2rem;
+  min-height: 44px;
+  border-radius: 14px;
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+.tab:hover { text-decoration: none; color: var(--ink); }
+.tab.on { color: var(--accent-ink); background: var(--accent-soft); }
+.tab-ico {
+  width: 22px;
+  height: 22px;
+  background: currentColor;
+  mask-position: center;
+  mask-repeat: no-repeat;
+  mask-size: contain;
+  -webkit-mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+}
+.tab-ico[data-icon="now"] {
+  mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'><circle cx='12' cy='12' r='8'/><path d='M12 8v4l3 2'/></svg>");
+  -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'><circle cx='12' cy='12' r='8'/><path d='M12 8v4l3 2'/></svg>");
+}
+.tab-ico[data-icon="diary"] {
+  mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'><path d='M8 5h11v14H8z'/><path d='M5 5v14'/><path d='M11 9h5M11 13h5'/></svg>");
+  -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'><path d='M8 5h11v14H8z'/><path d='M5 5v14'/><path d='M11 9h5M11 13h5'/></svg>");
+}
+.tab-ico[data-icon="food"] {
+  mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'><path d='M4 11h16v2a6 6 0 0 1-6 6h-4a6 6 0 0 1-6-6v-2z'/><path d='M8 11V7M12 11V5M16 11V8'/></svg>");
+  -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'><path d='M4 11h16v2a6 6 0 0 1-6 6h-4a6 6 0 0 1-6-6v-2z'/><path d='M8 11V7M12 11V5M16 11V8'/></svg>");
+}
+
+.ex-point-list {
+  list-style: none;
+  margin: 0.85rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  max-height: 220px;
+  overflow: auto;
+}
+.ex-point-item {
+  display: grid;
+  grid-template-columns: 4.5rem 1fr;
+  gap: 0.35rem 0.65rem;
+  font-size: 0.82rem;
+  padding: 0.35rem 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+.ex-point-date { color: var(--muted); font-variant-numeric: tabular-nums; }
+.ex-point-dose { font-weight: 600; }

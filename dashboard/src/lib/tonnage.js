@@ -72,6 +72,21 @@ export function formatTonnageKg(kg) {
   return `${Math.round(kg)} кг`
 }
 
+/** Тонаж одной дозы: кг × повторы × подходы. Несколько блоков через «+» суммируются. */
+export function tonnageFromDose(dose) {
+  if (dose == null || dose === '') return null
+  const parts = String(dose).split(/\s*\+\s*/).filter(Boolean)
+  let total = 0
+  let any = false
+  for (const part of parts) {
+    const p = parseDose(part)
+    if (!p.loadKg || !p.reps) continue
+    any = true
+    total += p.loadKg * p.reps * Math.max(1, p.sets || 1)
+  }
+  return any ? Math.round(total) : null
+}
+
 /** Ориентир для домашнего зала со снарядом (не BW) */
 export function tonnageGuide(bodyweightKg) {
   const bw = Number(bodyweightKg)

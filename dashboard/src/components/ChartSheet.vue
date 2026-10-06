@@ -13,6 +13,9 @@ const props = defineProps({
   hint: { type: String, default: '' },
   /** 'line' | 'bar' */
   chartType: { type: String, default: 'line' },
+  valueFormat: Function,
+  yTickFormat: Function,
+  showValues: { type: Boolean, default: true },
 })
 
 const emit = defineEmits(['close'])
@@ -70,6 +73,9 @@ onUnmounted(() => window.removeEventListener('keydown', onKey))
               :datasets="datasets"
               :suggested-max="suggestedMax"
               :suggested-min="suggestedMin"
+              :value-format="valueFormat"
+              :y-tick-format="yTickFormat"
+              :show-values="showValues"
             />
           </div>
           <p v-if="hint" class="hint-line" style="margin:0.75rem 0 0">{{ hint }}</p>

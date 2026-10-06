@@ -1,10 +1,9 @@
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed, ref } from 'vue'
+import { RouterLink } from 'vue-router'
 import RingProgress from '@/components/RingProgress.vue'
 import ExerciseCard from '@/components/ExerciseCard.vue'
 import TonnageTrend from '@/components/TonnageTrend.vue'
-import TonnageStrip from '@/components/TonnageStrip.vue'
-import ProgressBadge from '@/components/ProgressBadge.vue'
 import ChartSheet from '@/components/ChartSheet.vue'
 import PeriodPicker from '@/components/PeriodPicker.vue'
 import { LineChart, DoughnutChart, RadarChart } from '@/components/Charts'
@@ -17,18 +16,11 @@ import {
   summary,
 } from '@/data/alexander'
 import { byChrono } from '@/data/chrono'
-import { rowTonnage, formatTonnageKg, tonnageSeries } from '@/lib/tonnage'
-import { annotateSessionExercises } from '@/lib/progressDelta'
-import {
-  estimateRowBurn,
-  burnSeriesForLabels,
-  burnGuideNote,
-} from '@/lib/activityBurn'
+import { formatTonnageKg, tonnageSeries } from '@/lib/tonnage'
 import { inPeriod } from '@/lib/period'
 
 const s = summary()
 const period = ref(null)
-const sessionSearch = ref('')
 
 const journalDates = [
   ...trainRows.map((t) => t.date),
@@ -70,56 +62,6 @@ const weightDatasets = computed(() => [{
   pointBackgroundColor: '#0a7a5c',
 }])
 
-const foodLabels = computed(() => fullFood.value.map((r) => r.date))
-const proteinDatasets = computed(() => [{
-  label: 'Белок г',
-  data: fullFood.value.map((r) => r.proteinMid),
-  borderColor: '#0a7a5c',
-  backgroundColor: '#0a7a5c22',
-  fill: true,
-  tension: 0.3,
-  pointRadius: 2,
-}])
-
-const burnValues = computed(() =>
-  burnSeriesForLabels(foodLabels.value, trainInPeriod.value, s.lastKg),
-)
-const burnHint = computed(() => burnGuideNote(s.lastKg))
-
-const kcalDatasets = computed(() => {
-  const burnData = burnValues.value
-  return [
-    {
-      label: 'Еда',
-      data: fullFood.value.map((r) => r.kcalMid),
-      borderColor: '#c45c28',
-      backgroundColor: '#c45c2822',
-      fill: true,
-      tension: 0.3,
-      pointRadius: 2,
-      pointBackgroundColor: '#c45c28',
-    },
-    {
-      label: 'Активность ≈',
-      data: burnData,
-      borderColor: '#1a6f8a',
-      backgroundColor: 'transparent',
-      fill: false,
-      tension: 0.25,
-      spanGaps: false,
-      pointRadius: burnData.map((v) => (v != null ? 4 : 0)),
-      pointBackgroundColor: '#1a6f8a',
-      borderDash: [5, 4],
-    },
-  ]
-})
-const kcalChartMax = computed(() => {
-  const intake = fullFood.value.map((r) => r.kcalMid)
-  const burn = burnValues.value.filter((v) => v != null)
-  const m = Math.max(...intake, ...(burn.length ? burn : [0]), 2200)
-  return Math.ceil(m / 100) * 100 + 100
-})
-
 const sheet = ref(null)
 function openSheet(payload) {
   sheet.value = payload
@@ -136,67 +78,6 @@ const kindsInPeriod = computed(() =>
   }, {}),
 )
 const doughnutValues = computed(() => kindOrder.map((k) => kindsInPeriod.value[k] || 0))
-
-const sessionFilter = ref('all')
-const filterChips = computed(() => {
-  const counts = kindsInPeriod.value
-  const n = trainInPeriod.value.length
-  return [
-    { id: 'all', label: 'Все', count: n },
-    ...kindOrder
-      .filter((k) => counts[k])
-      .map((k) => ({ id: k, label: kindLabels[k], count: counts[k] })),
-  ]
-})
-
-function sessionKey(t) {
-  return `${t.date}::${t.type}`
-}
-
-const sessions = computed(() => {
-  const all = [...trainInPeriod.value].reverse()
-  let filtered = sessionFilter.value === 'all'
-    ? all
-    : all.filter((t) => t.kind === sessionFilter.value)
-  const q = sessionSearch.value.trim().toLowerCase()
-  if (q) {
-    filtered = filtered.filter(
-      (t) =>
-        t.body.toLowerCase().includes(q) ||
-        t.type.toLowerCase().includes(q) ||
-        t.mark.toLowerCase().includes(q),
-    )
-  }
-  return filtered.map((t) => {
-    const tonnage = rowTonnage(t)
-    const annotated = annotateSessionExercises(t, trainRows)
-    const burn = estimateRowBurn(t, s.lastKg)
-    return { ...t, tonnage, annotated, burn, key: sessionKey(t) }
-  })
-})
-
-const openSession = ref(null)
-watch(
-  sessions,
-  (list) => {
-    if (!list.length) {
-      openSession.value = null
-      return
-    }
-    if (!list.some((t) => t.key === openSession.value)) {
-      openSession.value = list[0].key
-    }
-  },
-  { immediate: true },
-)
-
-watch(sessionFilter, () => {
-  openSession.value = sessions.value[0]?.key || null
-})
-
-function toggleSession(key) {
-  openSession.value = openSession.value === key ? null : key
-}
 
 const radarValues = computed(() => [
   Math.min(5, kindsInPeriod.value.A || 0),
@@ -226,7 +107,7 @@ const layers = [
   { id: 'legs', title: 'Ноги / hinge', ids: ['rdl', 'goblet', 'bridge', 'farmer'] },
   { id: 'core', title: 'Кор / прочее', ids: ['roman', 'deadbug', 'clean'] },
 ]
-const openLayer = ref({ pull: true, push: false, legs: true, core: false })
+const openLayer = ref({ pull: true, push: true, legs: true, core: false })
 
 const exercisesInPeriod = computed(() =>
   exercises.map((ex) => {
@@ -252,9 +133,9 @@ function exInLayer(layer) {
   <div class="athlete-page">
     <div class="gym-hero">
       <div>
-        <p class="eyebrow">Athlete · план v1.9</p>
+        <p class="eyebrow">Athlete · кабинет</p>
         <h1 class="page-title">{{ meta.name }}</h1>
-        <p class="page-sub">Сила · тонаж снаряда · питание · обновлено {{ meta.updated }}</p>
+        <p class="page-sub">Сила · тонаж · обновлено {{ meta.updated }}</p>
       </div>
       <div class="gym-hero-kpis">
         <div class="gym-kpi">
@@ -278,6 +159,11 @@ function exInLayer(layer) {
           <span class="hint">{{ last?.date }} · {{ last?.type }}</span>
         </div>
       </div>
+    </div>
+
+    <div class="quick-tabs">
+      <RouterLink class="quick-tab" to="/alexander/diary">Дневник сессий →</RouterLink>
+      <RouterLink class="quick-tab" to="/alexander/food">Еда / БЖУ →</RouterLink>
     </div>
 
     <PeriodPicker
@@ -342,89 +228,8 @@ function exInLayer(layer) {
 
     <div class="group-gap">
       <div class="section-label">
-        <h2>Сессии</h2>
-        <span class="hint">{{ sessions.length }} · одна открыта</span>
-      </div>
-      <div class="session-filters" role="tablist" aria-label="Фильтр сессий">
-        <button
-          v-for="chip in filterChips"
-          :key="chip.id"
-          type="button"
-          class="session-chip"
-          role="tab"
-          :aria-selected="sessionFilter === chip.id"
-          :data-active="sessionFilter === chip.id ? '1' : null"
-          @click="sessionFilter = chip.id"
-        >
-          {{ chip.label }}
-          <span class="session-chip-n">{{ chip.count }}</span>
-        </button>
-      </div>
-      <input
-        v-model="sessionSearch"
-        type="search"
-        class="session-search"
-        placeholder="Поиск: farmer, лесенка, мост…"
-        aria-label="Поиск по сессиям"
-      />
-      <div class="session-cards">
-        <article
-          v-for="t in sessions"
-          :key="t.key"
-          class="session-card"
-          :data-open="openSession === t.key ? '1' : null"
-        >
-          <button
-            type="button"
-            class="session-card-toggle"
-            :aria-expanded="openSession === t.key"
-            @click="toggleSession(t.key)"
-          >
-            <div class="session-card-head">
-              <div>
-                <span class="session-date">{{ t.date }}</span>
-                <span class="session-type">{{ t.type }}</span>
-              </div>
-              <div class="session-card-end">
-                <span v-if="t.burn.total" class="session-ton-mini" title="оценка расхода">≈{{ t.burn.total }} ккал</span>
-                <span v-if="t.tonnage.totalKg" class="session-ton-mini">{{ formatTonnageKg(t.tonnage.totalKg) }}</span>
-                <span class="session-mark">{{ t.mark }}</span>
-                <span class="session-chevron" aria-hidden="true">{{ openSession === t.key ? '▾' : '▸' }}</span>
-              </div>
-            </div>
-            <p v-if="openSession !== t.key" class="session-preview">{{ t.body }}</p>
-          </button>
-          <div v-show="openSession === t.key" class="session-panel">
-            <p class="session-body">{{ t.body }}</p>
-            <p v-if="t.burn.total" class="session-burn-line">
-              Расход ≈ <strong>{{ t.burn.total }} ккал</strong>
-              <template v-if="t.burn.min"> · тренировка {{ t.burn.min }} мин</template>
-              <template v-if="t.burn.walkMin"> · прогулка {{ t.burn.walkMin }} мин (≈{{ t.burn.walk }})</template>
-            </p>
-            <TonnageStrip v-if="t.tonnage.totalKg" :tonnage="t.tonnage" />
-            <ul v-if="t.annotated.length" class="session-ex">
-              <li v-for="(e, i) in t.annotated" :key="i">
-                <span>{{ e.name }}</span>
-                <span class="dose">{{ e.dose }}</span>
-                <ProgressBadge
-                  v-if="e.delta"
-                  :label="e.delta.label"
-                  :tone="e.delta.tone"
-                />
-              </li>
-            </ul>
-          </div>
-        </article>
-        <p v-if="!sessions.length" class="hint-line">
-          {{ sessionSearch || sessionFilter !== 'all' ? 'Ничего не найдено — сбрось фильтр или поиск.' : 'Нет сессий в этом периоде.' }}
-        </p>
-      </div>
-    </div>
-
-    <div class="group-gap">
-      <div class="section-label">
         <h2>Упражнения</h2>
-        <span class="hint">слои · бейдж к прошлому замеру</span>
+        <span class="hint">наведи на точку — доза и тонаж</span>
       </div>
       <div v-for="layer in layers" :key="layer.id" class="chart-layer">
         <button
@@ -442,93 +247,32 @@ function exInLayer(layer) {
       </div>
     </div>
 
-    <div class="group-gap">
-      <div class="section-label">
-        <h2>Детали</h2>
-        <span class="hint">питание · баланс</span>
-      </div>
-
-      <details class="disclose">
-        <summary>
-          Питание по дням
-          <span class="meta-line">белок · ккал</span>
-        </summary>
-        <div class="disclose-body">
-          <div class="grid grid-2">
-            <div>
-              <h3 style="margin:0 0 0.5rem;font-size:0.85rem;color:var(--muted)">Белок</h3>
-              <button
-                type="button"
-                class="chart-hit"
-                aria-label="Открыть график белка"
-                @click="openSheet({
-                  title: 'Белок по дням',
-                  subtitle: 'г',
-                  labels: foodLabels,
-                  datasets: proteinDatasets,
-                  suggestedMax: 220,
-                  hint: `среднее ${s.avgProtein} г · цель ${meta.targetProtein.join('–')}`,
-                })"
-              >
-                <div class="chart-box">
-                  <LineChart :labels="foodLabels" :datasets="proteinDatasets" :suggested-max="220" />
-                </div>
-                <span class="chart-hit-hint">нажми — крупнее</span>
-              </button>
-            </div>
-            <div>
-              <h3 style="margin:0 0 0.5rem;font-size:0.85rem;color:var(--muted)">Ккал</h3>
-              <button
-                type="button"
-                class="chart-hit"
-                aria-label="Открыть график ккал"
-                @click="openSheet({
-                  title: 'Ккал: еда и активность',
-                  subtitle: 'приём · оценка расхода',
-                  labels: foodLabels,
-                  datasets: kcalDatasets,
-                  suggestedMax: kcalChartMax,
-                  hint: burnHint,
-                })"
-              >
-                <div class="chart-box">
-                  <LineChart :labels="foodLabels" :datasets="kcalDatasets" :suggested-max="kcalChartMax" />
-                </div>
-                <span class="chart-hit-hint">нажми — крупнее · пунктир = активность</span>
-              </button>
-              <p class="hint-line">{{ burnHint }}</p>
-            </div>
+    <details class="disclose group-gap">
+      <summary>
+        Баланс нагрузки
+        <span class="meta-line">A / B / C</span>
+      </summary>
+      <div class="disclose-body">
+        <div class="grid grid-2">
+          <div class="chart-box sm">
+            <DoughnutChart
+              :labels="kindOrder.map((k) => kindLabels[k])"
+              :values="doughnutValues"
+              :colors="kindColors"
+            />
           </div>
-        </div>
-      </details>
-
-      <details class="disclose">
-        <summary>
-          Баланс нагрузки
-          <span class="meta-line">A / B / C</span>
-        </summary>
-        <div class="disclose-body">
-          <div class="grid grid-2">
+          <div>
             <div class="chart-box sm">
-              <DoughnutChart
-                :labels="kindOrder.map((k) => kindLabels[k])"
-                :values="doughnutValues"
-                :colors="kindColors"
+              <RadarChart
+                :labels="['A', 'B', 'C', 'Лёгкий', 'Белок-дни']"
+                :values="radarValues"
+                label="Объём"
               />
             </div>
-            <div>
-              <div class="chart-box sm">
-                <RadarChart
-                  :labels="['A', 'B', 'C', 'Лёгкий', 'Белок-дни']"
-                  :values="radarValues"
-                  label="Объём"
-                />
-              </div>
-            </div>
           </div>
         </div>
-      </details>
-    </div>
+      </div>
+    </details>
 
     <ChartSheet
       :open="!!sheet"

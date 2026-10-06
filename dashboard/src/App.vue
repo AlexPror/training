@@ -1,10 +1,14 @@
 <script setup>
-import { RouterLink, RouterView } from 'vue-router'
+import { computed } from 'vue'
+import { RouterLink, RouterView, useRoute } from 'vue-router'
+
+const route = useRoute()
+const inAthleteCabinet = computed(() => route.path.startsWith('/alexander'))
 </script>
 
 <template>
-  <div class="shell">
-    <header class="topnav">
+  <div class="shell" :class="{ family: inAthleteCabinet, 'no-global-nav': inAthleteCabinet }">
+    <header v-if="!inAthleteCabinet" class="topnav">
       <RouterLink class="brand" to="/">FORCE<span class="brand-sub">лог</span></RouterLink>
       <nav class="nav-links" aria-label="Разделы">
         <RouterLink to="/">Обзор</RouterLink>
@@ -15,7 +19,7 @@ import { RouterLink, RouterView } from 'vue-router'
       </nav>
     </header>
     <RouterView />
-    <footer class="site">
+    <footer v-if="!inAthleteCabinet" class="site">
       FORCE · тонаж снаряда + индекс прибавки · данные через чат
     </footer>
   </div>
