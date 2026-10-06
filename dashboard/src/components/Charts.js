@@ -69,10 +69,44 @@ Chart.register(valueLabelsPlugin)
 function useChart(type, dataRef, optionsRef, onClickRef) {
   const canvas = ref(null)
   let chart
+
+  function apply() {
+    if (!chart) return
+    const raw = dataRef.value || { labels: [], datasets: [] }
+    // Клон: Chart.js мутирует data in-place — deep-watch иначе уходит в цикл и «роняет» страницу
+    chart.data = {
+      labels: [...(raw.labels || [])],
+      datasets: (raw.datasets || []).map((ds) => ({
+        ...ds,
+        data: Array.isArray(ds.data) ? [...ds.data] : ds.data,
+        pointMeta: Array.isArray(ds.pointMeta) ? ds.pointMeta.map((m) => ({ ...m })) : ds.pointMeta,
+        pointRadius: Array.isArray(ds.pointRadius) ? [...ds.pointRadius] : ds.pointRadius,
+        pointBackgroundColor: Array.isArray(ds.pointBackgroundColor)
+          ? [...ds.pointBackgroundColor]
+          : ds.pointBackgroundColor,
+        borderDash: Array.isArray(ds.borderDash) ? [...ds.borderDash] : ds.borderDash,
+      })),
+    }
+    chart.options = {
+      ...optionsRef.value,
+      onClick: (evt, elements) => {
+        onClickRef?.value?.(evt, elements, chart)
+      },
+    }
+    chart.update('none')
+  }
+
   onMounted(() => {
+    const raw = dataRef.value || { labels: [], datasets: [] }
     chart = new Chart(canvas.value, {
       type,
-      data: dataRef.value,
+      data: {
+        labels: [...(raw.labels || [])],
+        datasets: (raw.datasets || []).map((ds) => ({
+          ...ds,
+          data: Array.isArray(ds.data) ? [...ds.data] : ds.data,
+        })),
+      },
       options: {
         ...optionsRef.value,
         onClick: (evt, elements) => {
@@ -81,17 +115,23 @@ function useChart(type, dataRef, optionsRef, onClickRef) {
       },
     })
   })
-  watch([dataRef, optionsRef], () => {
-    if (!chart) return
-    chart.data = dataRef.value
-    chart.options = {
-      ...optionsRef.value,
-      onClick: (evt, elements) => {
-        onClickRef?.value?.(evt, elements, chart)
-      },
-    }
-    chart.update()
-  }, { deep: true })
+  watch(
+    () =>
+      JSON.stringify({
+        labels: dataRef.value?.labels || [],
+        series: (dataRef.value?.datasets || []).map((d) => ({
+          data: d.data,
+          label: d.label,
+          pointMeta: d.pointMeta,
+          borderDash: d.borderDash,
+          _skip: d._skipLabels,
+        })),
+        max: optionsRef.value?.scales?.y?.suggestedMax ?? null,
+        min: optionsRef.value?.scales?.y?.suggestedMin ?? null,
+        values: optionsRef.value?.plugins?.valueLabels?.enabled !== false,
+      }),
+    () => apply(),
+  )
   onBeforeUnmount(() => chart?.destroy())
   return canvas
 }

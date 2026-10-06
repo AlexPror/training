@@ -16,6 +16,7 @@ const search = ref('')
 const period = ref(null)
 const sheet = ref(null)
 const selectedDay = ref(null)
+const foodDates = foodRows.map((r) => r.date)
 
 const food = computed(() => FOODS.find((f) => f.id === selected.value))
 const cats = computed(() => [...new Set(FOODS.map((f) => f.cat))])
@@ -192,7 +193,7 @@ const kcalMidTarget = computed(() => Math.round((meta.targetKcal[0] + meta.targe
 
     <PeriodPicker
       slug="food"
-      :dates="foodRows.map((r) => r.date)"
+      :dates="foodDates"
       track-from="2026-08-17"
       @update:period="period = $event"
     />

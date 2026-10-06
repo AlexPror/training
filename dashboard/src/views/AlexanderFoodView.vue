@@ -15,6 +15,7 @@ import {
 const s = summary()
 const period = ref(null)
 const sheet = ref(null)
+const foodDates = foodRows.map((r) => r.date)
 
 const fullFood = computed(() => {
   let rows = byChrono(
@@ -92,7 +93,7 @@ const kcalChartMax = computed(() => {
 
     <PeriodPicker
       slug="alexander-food"
-      :dates="foodRows.map((r) => r.date)"
+      :dates="foodDates"
       track-from="2026-08-17"
       @update:period="period = $event"
     />
@@ -116,7 +117,7 @@ const kcalChartMax = computed(() => {
       >
         <h3 style="margin:0 0 0.5rem;font-size:0.85rem;color:var(--muted)">Белок</h3>
         <div class="chart-box sm">
-          <LineChart :labels="foodLabels" :datasets="proteinDatasets" :suggested-max="220" />
+          <LineChart :labels="foodLabels" :datasets="proteinDatasets" :suggested-max="220" :show-values="false" />
         </div>
         <span class="chart-hit-hint">нажми — крупнее</span>
       </button>
@@ -128,7 +129,7 @@ const kcalChartMax = computed(() => {
       >
         <h3 style="margin:0 0 0.5rem;font-size:0.85rem;color:var(--muted)">Ккал</h3>
         <div class="chart-box sm">
-          <LineChart :labels="foodLabels" :datasets="kcalDatasets" :suggested-max="kcalChartMax" />
+          <LineChart :labels="foodLabels" :datasets="kcalDatasets" :suggested-max="kcalChartMax" :show-values="false" />
         </div>
         <span class="chart-hit-hint">нажми — крупнее</span>
       </button>
@@ -143,6 +144,7 @@ const kcalChartMax = computed(() => {
       :datasets="sheet?.datasets || []"
       :suggested-max="sheet?.suggestedMax"
       :hint="sheet?.hint || ''"
+      :show-values="false"
       @close="sheet = null"
     />
   </div>

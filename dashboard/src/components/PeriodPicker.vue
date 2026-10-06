@@ -44,7 +44,21 @@ const activeLabel = computed(() => {
   return PERIOD_PRESETS.find((p) => p.id === id)?.label || 'Период'
 })
 
-watch(period, (p) => emit('update:period', p), { immediate: true })
+watch(
+  period,
+  (p, prev) => {
+    if (
+      prev &&
+      p?.startIso === prev.startIso &&
+      p?.endIso === prev.endIso &&
+      p?.mode === prev.mode
+    ) {
+      return
+    }
+    emit('update:period', p)
+  },
+  { immediate: true },
+)
 
 watch(
   () => props.slug,
