@@ -9,7 +9,7 @@ function midRange(s) {
 
 export const meta = {
   name: 'Александр',
-  updated: '06.10.2026',
+  updated: '07.10.2026',
   height: 180,
   startKg: 101.5,
   targetProtein: [160, 180],
@@ -145,6 +145,17 @@ export const foodDays = [
       { id: 'peas', grams: 50, meal: 'Ужин' },
       { id: 'pasta_ww', grams: 200, meal: 'Ужин' },
       { id: 'kissel', grams: 250, meal: 'Ужин' },
+    ],
+  },
+  {
+    date: '2026-10-07',
+    note: 'День открыт: пока завтрак. Тренировка — по спине (план B).',
+    menu: [
+      { meal: 'Завтрак', dishes: 'Творог 5% 350 г, Активиа йогурт 200 г' },
+    ],
+    items: [
+      { id: 'tvorog5', grams: 350, meal: 'Завтрак' },
+      { id: 'activia', grams: 200, meal: 'Завтрак' },
     ],
   },
 ]
@@ -285,6 +296,14 @@ export const trainRows = [
     kind: 'easy',
     min: 40,
   },
+  {
+    date: '07.10',
+    type: 'Ср',
+    body: 'завтрак: творог5 350 + Активиа 200; тренировка — см. план B / по спине',
+    mark: 'еда↓',
+    kind: 'rest',
+    min: 0,
+  },
 ]
 
 export const foodRows = [
@@ -333,6 +352,7 @@ export const foodRows = [
   { date: '04.10', protein: '~155–185', kcal: '~1900–2200' },
   { date: '05.10', protein: '~15–25', kcal: '~450–550' },
   { date: '06.10', protein: '~170–195', kcal: '~1900–2200' },
+  { date: '07.10', protein: '~65–75', kcal: '~550–650' },
 ].map((r) => ({
   ...r,
   proteinMid: midRange(r.protein),
