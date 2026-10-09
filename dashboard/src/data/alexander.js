@@ -9,7 +9,7 @@ function midRange(s) {
 
 export const meta = {
   name: 'Александр',
-  updated: '07.10.2026',
+  updated: '09.10.2026',
   height: 180,
   startKg: 101.5,
   targetProtein: [160, 180],
@@ -149,13 +149,30 @@ export const foodDays = [
   },
   {
     date: '2026-10-07',
-    note: 'День открыт: пока завтрак. Тренировка — по спине (план B).',
+    note: 'Частично: завтрак. Без силовой.',
     menu: [
       { meal: 'Завтрак', dishes: 'Творог 5% 350 г, Активиа йогурт 200 г' },
     ],
     items: [
       { id: 'tvorog5', grams: 350, meal: 'Завтрак' },
       { id: 'activia', grams: 200, meal: 'Завтрак' },
+    ],
+  },
+  {
+    date: '2026-10-09',
+    note: 'Пт C: подтяг пик 8; белок чуть ниже цели без сыворотки.',
+    menu: [
+      { meal: 'Завтрак', dishes: 'Творог 5% 350 г' },
+      { meal: 'Обед', dishes: 'Яйца 4, макароны ц/з 300 г' },
+      { meal: 'Ужин', dishes: 'Картошка тушёная 300 г, блины 2, молоко 2,5% 100 г' },
+    ],
+    items: [
+      { id: 'tvorog5', grams: 350, meal: 'Завтрак' },
+      { id: 'egg', grams: 4, meal: 'Обед' },
+      { id: 'pasta_ww', grams: 300, meal: 'Обед' },
+      { id: 'potato', grams: 300, meal: 'Ужин' },
+      { id: 'blini', grams: 2, meal: 'Ужин' },
+      { id: 'milk25', grams: 100, meal: 'Ужин' },
     ],
   },
 ]
@@ -299,10 +316,26 @@ export const trainRows = [
   {
     date: '07.10',
     type: 'Ср',
-    body: 'завтрак: творог5 350 + Активиа 200; тренировка — см. план B / по спине',
-    mark: 'еда↓',
+    body: 'завтрак: творог5 350 + Активиа 200; без силовой (неделя без зала после Вт)',
+    mark: 'отдых',
     kind: 'rest',
     min: 0,
+  },
+  {
+    date: '08.10',
+    type: 'Чт',
+    body: 'без силовой',
+    mark: 'отдых',
+    kind: 'rest',
+    min: 0,
+  },
+  {
+    date: '09.10',
+    type: 'Сила C',
+    body: 'подтяг 6+7+8+7+6=34 (пик 8); отжим 5×20=100; жук 2×15; еда ~115–140б / ~1700–2000 (творог350+яйца4+мак.300+карт.300+блины2+молоко100)',
+    mark: 'C ✓✓',
+    kind: 'C',
+    min: 45,
   },
 ]
 
@@ -353,6 +386,7 @@ export const foodRows = [
   { date: '05.10', protein: '~15–25', kcal: '~450–550' },
   { date: '06.10', protein: '~170–195', kcal: '~1900–2200' },
   { date: '07.10', protein: '~65–75', kcal: '~550–650' },
+  { date: '09.10', protein: '~115–140', kcal: '~1700–2000' },
 ].map((r) => ({
   ...r,
   proteinMid: midRange(r.protein),
@@ -368,9 +402,9 @@ export const exercises = [
     goal: 25,
     goalLabel: 'цель: 25 в одном подходе',
     targetMax: 25,
-    current: 10,
-    currentLabel: 'сет **10** (06.10) — новый пик; было 7',
-    trend: '↑↑↑ НОВЫЙ МАКС',
+    current: 8,
+    currentLabel: 'сет **8** (09.10); пик рекорда 10 (06.10) — закрепление',
+    trend: '↑↑ 8 после пика 10',
     color: '#0a7a5c',
     points: [
       { label: '11.08', v: 6, note: 'макс чистых ~6' },
@@ -392,6 +426,7 @@ export const exercises = [
       { label: '01.10', v: 6, note: 'лесенка 4+5+6+5+4' },
       { label: '02.10', v: 7, note: '6+7+6+5+4' },
       { label: '06.10', v: 10, dose: '10+8+6+7+6', note: 'НОВЫЙ ПИК 10' },
+      { label: '09.10', v: 8, dose: '6+7+8+7+6', note: 'закрепление после 10' },
     ],
   },
   {
@@ -399,9 +434,9 @@ export const exercises = [
     name: 'Подтяг · объём сессии',
     unit: 'повт./сессия',
     goal: null,
-    current: 37,
-    currentLabel: '10+8+6+7+6=37 (06.10); пик сессии 40 (24.09)',
-    trend: '↑↑ объём',
+    current: 34,
+    currentLabel: '6+7+8+7+6=34 (09.10); пик сессии 40 (24.09); 37 (06.10)',
+    trend: 'C ✓✓',
     color: '#3d8a6a',
     points: [
       { label: '11.08', v: 6 },
@@ -425,6 +460,7 @@ export const exercises = [
       { label: '01.10', v: 24 },
       { label: '02.10', v: 28 },
       { label: '06.10', v: 37, dose: '10+8+6+7+6' },
+      { label: '09.10', v: 34, dose: '6+7+8+7+6' },
     ],
   },
   {
@@ -433,8 +469,8 @@ export const exercises = [
     unit: 'повт./сессия',
     goal: 100,
     current: 100,
-    currentLabel: 'ноги на лавке 50 см 5×20=100 (06.10) — тяжелее пола; было 4×25 пол 02.10',
-    trend: '↑↑ decline 100',
+    currentLabel: '5×20=100 (09.10); decline лавка 5×20 (06.10); 4×25 пол (02.10)',
+    trend: 'C ✓ 100',
     color: '#c45c28',
     points: [
       { label: '14.08', v: 60 },
@@ -456,6 +492,7 @@ export const exercises = [
       { label: '01.10', v: 50, dose: '1×10+2×20' },
       { label: '02.10', v: 100, dose: '4×25' },
       { label: '06.10', v: 100, dose: '5×20 ноги↑50см', note: 'decline лавка' },
+      { label: '09.10', v: 100, dose: '5×20' },
     ],
   },
   {
@@ -603,9 +640,9 @@ export const exercises = [
     name: 'Dead bug',
     unit: 'повт./стор',
     goal: 15,
-    current: 10,
-    currentLabel: '2×10 (01.10); пик 3×15 28.09',
-    trend: 'Чт лёгкий',
+    current: 15,
+    currentLabel: '2×15 (09.10); пик 3×15 28.09',
+    trend: 'C ✓',
     color: '#4d6a5c',
     points: [
       { label: '21.08', v: 10 },
@@ -616,6 +653,7 @@ export const exercises = [
       { label: '19.09', v: 15 },
       { label: '28.09', v: 15 },
       { label: '01.10', v: 10 },
+      { label: '09.10', v: 15, dose: '2×15' },
     ],
   },
   {
