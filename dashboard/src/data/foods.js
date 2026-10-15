@@ -6,6 +6,7 @@ export const FOODS = [
   { id: 'kefir32', name: 'Кефир 3,2%', cat: 'Молочка', kcal: 56, p: 2.9, f: 3.2, c: 4.0 },
   { id: 'milk25', name: 'Молоко 2,5%', cat: 'Молочка', kcal: 52, p: 2.8, f: 2.5, c: 4.7 },
   { id: 'milk_home', name: 'Молоко домашнее (~3,5%)', cat: 'Молочка', kcal: 64, p: 3.2, f: 3.5, c: 4.7 },
+  { id: 'milk_eko', name: 'Молоко Эконива цельное 3–6%', cat: 'Молочка', kcal: 67, p: 3.0, f: 4.5, c: 4.7 },
   { id: 'activia', name: 'Активиа йогурт ~1,5%', cat: 'Молочка', kcal: 75, p: 4.5, f: 1.5, c: 10 },
   { id: 'yogurt_chudo', name: 'Йогурт Чудо 1,8%', cat: 'Молочка', kcal: 72, p: 3.5, f: 1.8, c: 9.5 },
   { id: 'zapekanka', name: 'Запеканка творожная', cat: 'Молочка', kcal: 170, p: 14.0, f: 8.0, c: 12 },
@@ -47,6 +48,7 @@ export const FOODS = [
   { id: 'suluguni', name: 'Сулугуни', cat: 'Молочка', kcal: 290, p: 20.0, f: 24.0, c: 0 },
   { id: 'sausage_plant', name: 'Колбаса растительная', cat: 'Бобовые', kcal: 200, p: 15.0, f: 12.0, c: 8 },
   { id: 'cookie_oat', name: 'Печенье овсяное/шоколадное', cat: 'Крупы', kcal: 450, p: 7.0, f: 18.0, c: 65 },
+  { id: 'pie_apple', name: 'Пирог яблочный', cat: 'Крупы', kcal: 265, p: 4.0, f: 12.0, c: 35 },
   { id: 'ketchup', name: 'Кетчуп', cat: 'Овощи/фрукты', kcal: 100, p: 1.0, f: 0.1, c: 25 },
   { id: 'oil_tbsp', name: 'Масло 1 ст.л.', cat: 'Жиры', kcal: 90, p: 0, f: 10, c: 0, unitGrams: 1, unitLabel: 'ст.л.' },
 ]

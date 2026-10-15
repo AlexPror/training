@@ -9,7 +9,7 @@ function midRange(s) {
 
 export const meta = {
   name: 'Александр',
-  updated: '09.10.2026',
+  updated: '15.10.2026',
   height: 180,
   startKg: 101.5,
   targetProtein: [160, 180],
@@ -175,6 +175,18 @@ export const foodDays = [
       { id: 'milk25', grams: 100, meal: 'Ужин' },
     ],
   },
+  {
+    date: '2026-10-15',
+    note: 'День открыт: пока завтрак.',
+    menu: [
+      { meal: 'Завтрак', dishes: 'Творог 5% 400 г, молоко Эконива цельное 130 г, пирог яблочный 100 г' },
+    ],
+    items: [
+      { id: 'tvorog5', grams: 400, meal: 'Завтрак' },
+      { id: 'milk_eko', grams: 130, meal: 'Завтрак' },
+      { id: 'pie_apple', grams: 100, meal: 'Завтрак' },
+    ],
+  },
 ]
 
 export const weightRows = [
@@ -191,6 +203,7 @@ export const weightRows = [
   { date: '2026-09-21', label: '21.09', kg: 97.2, note: '+0.1 после Сб' },
   { date: '2026-09-28', label: '28.09', kg: 97.4, note: 'после A; +0.2' },
   { date: '2026-10-05', label: '05.10', kg: 97.8, note: 'утро после туалета, до еды; ночь блины+булочка' },
+  { date: '2026-10-13', label: '13.10', kg: 96.6, note: 'утро после туалета — новый мин.' },
 ]
 
 export const trainRows = [
@@ -337,6 +350,38 @@ export const trainRows = [
     kind: 'C',
     min: 45,
   },
+  {
+    date: '12.10',
+    type: 'Сила A−',
+    body: 'без спины; жим гант. 21.4 кг/руку 3×15+1×10; тяга гири 24 кг с опорой 4×12; кулаки узко 4×25=100',
+    mark: 'A ✓ (без спины)',
+    kind: 'A',
+    min: 40,
+  },
+  {
+    date: '13.10',
+    type: 'Вт верх',
+    body: 'вес утро 96.6; подтяг 6+7+8+6+7=34 (пик 8)',
+    mark: 'вес↓ / верх ✓',
+    kind: 'easy',
+    min: 25,
+  },
+  {
+    date: '14.10',
+    type: 'Ср',
+    body: 'без тренировок',
+    mark: 'отдых',
+    kind: 'rest',
+    min: 0,
+  },
+  {
+    date: '15.10',
+    type: 'Чт',
+    body: 'завтрак: творог5 400 + молоко Эконива 130 + пирог ябл.100; тренировка — пока нет',
+    mark: 'еда↓',
+    kind: 'rest',
+    min: 0,
+  },
 ]
 
 export const foodRows = [
@@ -387,6 +432,7 @@ export const foodRows = [
   { date: '06.10', protein: '~170–195', kcal: '~1900–2200' },
   { date: '07.10', protein: '~65–75', kcal: '~550–650' },
   { date: '09.10', protein: '~115–140', kcal: '~1700–2000' },
+  { date: '15.10', protein: '~75–85', kcal: '~750–900' },
 ].map((r) => ({
   ...r,
   proteinMid: midRange(r.protein),
@@ -403,8 +449,8 @@ export const exercises = [
     goalLabel: 'цель: 25 в одном подходе',
     targetMax: 25,
     current: 8,
-    currentLabel: 'сет **8** (09.10); пик рекорда 10 (06.10) — закрепление',
-    trend: '↑↑ 8 после пика 10',
+    currentLabel: 'сет **8** (13.10 / 09.10); пик рекорда 10 (06.10)',
+    trend: 'стабильно 8',
     color: '#0a7a5c',
     points: [
       { label: '11.08', v: 6, note: 'макс чистых ~6' },
@@ -427,6 +473,7 @@ export const exercises = [
       { label: '02.10', v: 7, note: '6+7+6+5+4' },
       { label: '06.10', v: 10, dose: '10+8+6+7+6', note: 'НОВЫЙ ПИК 10' },
       { label: '09.10', v: 8, dose: '6+7+8+7+6', note: 'закрепление после 10' },
+      { label: '13.10', v: 8, dose: '6+7+8+6+7', note: 'повтор пика сета 8' },
     ],
   },
   {
@@ -435,8 +482,8 @@ export const exercises = [
     unit: 'повт./сессия',
     goal: null,
     current: 34,
-    currentLabel: '6+7+8+7+6=34 (09.10); пик сессии 40 (24.09); 37 (06.10)',
-    trend: 'C ✓✓',
+    currentLabel: '6+7+8+6+7=34 (13.10); пик сессии 40 (24.09); 37 (06.10)',
+    trend: 'стабильно 34',
     color: '#3d8a6a',
     points: [
       { label: '11.08', v: 6 },
@@ -461,6 +508,7 @@ export const exercises = [
       { label: '02.10', v: 28 },
       { label: '06.10', v: 37, dose: '10+8+6+7+6' },
       { label: '09.10', v: 34, dose: '6+7+8+7+6' },
+      { label: '13.10', v: 34, dose: '6+7+8+6+7' },
     ],
   },
   {
@@ -469,8 +517,8 @@ export const exercises = [
     unit: 'повт./сессия',
     goal: 100,
     current: 100,
-    currentLabel: '5×20=100 (09.10); decline лавка 5×20 (06.10); 4×25 пол (02.10)',
-    trend: 'C ✓ 100',
+    currentLabel: 'кулаки узко 4×25=100 (12.10); 5×20 (09.10); decline 06.10',
+    trend: 'A ✓ 100',
     color: '#c45c28',
     points: [
       { label: '14.08', v: 60 },
@@ -493,16 +541,17 @@ export const exercises = [
       { label: '02.10', v: 100, dose: '4×25' },
       { label: '06.10', v: 100, dose: '5×20 ноги↑50см', note: 'decline лавка' },
       { label: '09.10', v: 100, dose: '5×20' },
+      { label: '12.10', v: 100, dose: '4×25 кулаки узко' },
     ],
   },
   {
     id: 'press',
-    name: 'Жим 2×16',
+    name: 'Жим 2×16 / гантели',
     unit: 'повт. сумма',
     goal: 48,
-    current: 60,
-    currentLabel: 'наклон 45° 3×20 (28.09)',
-    trend: '↑↑ наклон',
+    current: 55,
+    currentLabel: 'гантели 21.4 кг/руку 3×15+1×10 (12.10); было гири 2×16 наклон 3×20 28.09',
+    trend: '↑↑ гант. 21.4',
     color: '#3d6b8a',
     points: [
       { label: '12.08', v: 32, dose: '4×8 × 16 кг' },
@@ -512,6 +561,7 @@ export const exercises = [
       { label: '14.09', v: 60, dose: '4×15 × 16 кг' },
       { label: '21.09', v: 40, dose: '1×10+2×15 × 16 кг' },
       { label: '28.09', v: 60, dose: '3×20 × 16 кг' },
+      { label: '12.10', v: 55, dose: '3×15+1×10 × 21.4 кг/руку', note: 'гантели' },
     ],
   },
   {
@@ -557,9 +607,9 @@ export const exercises = [
     name: 'Тяга к поясу',
     unit: 'повт. сумма',
     goal: 60,
-    current: 60,
-    currentLabel: '3×20 (28.09)',
-    trend: '↑↑',
+    current: 48,
+    currentLabel: 'гиря 24 кг с опорой на скамью 4×12 (12.10); было 3×20 28.09',
+    trend: '↑ 24кг опора',
     color: '#5c6b4a',
     points: [
       { label: '24.08', v: 40 },
@@ -568,6 +618,7 @@ export const exercises = [
       { label: '14.09', v: 60 },
       { label: '21.09', v: 55 },
       { label: '28.09', v: 60 },
+      { label: '12.10', v: 48, dose: '4×12 × 24 кг опора', note: 'гиря, скамья' },
     ],
   },
   {
